@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  plex:
+    image: plexinc/pms-docker:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - TZ=Europe/Dublin
+      - PLEX_CLAIM=claim-Z_uK5UyurbukDQAD4jNc
+    volumes:
+      - /home/karant/docker-data/plex/config:/config
+      - /mnt/media/docker-data/plex/transcode:/transcode
+      - /mnt/media:/media
+    restart: unless-stopped
+
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "8080:80"
+    volumes:
+      - /mnt/media:/srv
+    restart: unless-stopped
