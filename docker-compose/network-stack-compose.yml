@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    volumes:
+      - /home/karant/docker-data/npm-data:/data
+      - /home/karant/docker-data/letsencrypt:/etc/letsencrypt
+    networks:
+      - homelab-net
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    environment:
+      - TZ=Europe/Dublin
+      - WEBPASSWORD=[PASSWORD]
+    volumes:
+      - /home/karant/docker-data/pihole/etc-pihole:/etc/pihole
+      - /home/karant/docker-data/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8088:80/tcp"
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks:
+      - homelab-net
+
+networks:
+  homelab-net:
+    external: true

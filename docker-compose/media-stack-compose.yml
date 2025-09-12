@@ -24,3 +24,9 @@ services:
     volumes:
       - /mnt/media:/srv
     restart: unless-stopped
+    networks:
+      - homelab-net
+
+networks:
+  homelab-net:
+    external: true
