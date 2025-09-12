@@ -1,0 +1,21 @@
+services:
+  transmission-vpn:
+    image: haugene/transmission-openvpn
+    container_name: transmission-vpn
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+      - OPENVPN_PROVIDER=PIA
+      - OPENVPN_CONFIG=netherlands
+      - OPENVPN_USERNAME[USER]
+      - OPENVPN_PASSWORD=[PASSWORD]
+      - LOCAL_NETWORK=192.168.0.0/24
+    volumes:
+      - /home/karant/docker-data/transmission-config:/config
+      - /mnt/media/data:/data
+    ports:
+      - 9091:9091
+    restart: unless-stopped

@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  homebridge:
+    image: homebridge/homebridge:latest
+    container_name: homebridge
+    network_mode: host
+    environment:
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/karant/docker-data/homebridge/config:/homebridge
+    restart: unless-stopped

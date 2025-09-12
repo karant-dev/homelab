@@ -6,7 +6,7 @@ services:
     network_mode: host
     environment:
       - TZ=Europe/Dublin
-      - PLEX_CLAIM=claim-Z_uK5UyurbukDQAD4jNc
+      - PLEX_CLAIM=[NEW PLEX CLAIM]
     volumes:
       - /home/karant/docker-data/plex/config:/config
       - /mnt/media/docker-data/plex/transcode:/transcode
