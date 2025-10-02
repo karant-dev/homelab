@@ -4,6 +4,12 @@ services:
     image: 'jc21/nginx-proxy-manager:latest'
     container_name: npm
     restart: unless-stopped
+    environment:
+      - TZ=Europe/Dublin
+      - DISABLE_IPV6=true
+    dns:
+      - <PIHOLE_IP>
+      - 1.1.1.1
     ports:
       - '80:80'
       - '443:443'
@@ -13,6 +19,11 @@ services:
       - /home/karant/docker-data/letsencrypt:/etc/letsencrypt
     networks:
       - homelab-net
+    healthcheck:
+      test: ["CMD", "/usr/bin/check-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   pihole:
     image: pihole/pihole:latest
