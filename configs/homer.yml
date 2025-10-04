@@ -116,7 +116,7 @@ services:
       - name: "Filebrowser"
         logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/filebrowser.png"
         subtitle: "File Manager"
-        url: "https://fb.karant.dev"
+        url: "https://files.karant.dev"
         target: "_blank"
         endpoint: "http://172.20.0.5:8080"
         type: "Ping"

@@ -18,6 +18,7 @@ services:
       - /mnt/media/data:/data
     ports:
       - 9091:9091
+      - 9696:9696
     restart: unless-stopped
     networks:
       - homelab-net
