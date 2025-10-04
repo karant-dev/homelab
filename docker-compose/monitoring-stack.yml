@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  homer:
+    image: b4bz/homer
+    container_name: homer
+    volumes:
+      - /home/karant/docker-data/homer/config/dir:/www/assets
+    ports:
+      - 8085:8080
+    user: "1000:1000"
+    environment:
+      - INIT_ASSETS=1
+    restart: unless-stopped
+    networks:
+      - homelab-net
+
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    restart: unless-stopped
+    pid: host
+    privileged: true
+    network_mode: host
+    environment:
+      - GLANCES_OPT=-w
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    ports:
+      - "61208:61208"
+
+networks:
+  homelab-net:
+    external: true

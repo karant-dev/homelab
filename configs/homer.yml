@@ -1,0 +1,122 @@
+---
+title: "Karant's Homelab"
+subtitle: "Raspberry Pi 5 | Tailscale Network"
+logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homer.png"
+
+theme: default
+header: true
+footer: '<p>🚀 Built with Homer | 🔒 Secured by Tailscale</p>'
+
+columns: "3"
+connectivityCheck: true
+
+links:
+  - name: "Portainer"
+    icon: "fas fa-dharmachakra"
+    url: "https://portainer.karant.dev"
+    target: "_blank"
+  - name: "Cloudflare"
+    icon: "fas fa-cloud"
+    url: "https://dash.cloudflare.com"
+    target: "_blank"
+  - name: "Tailscale Admin"
+    icon: "fas fa-network-wired"
+    url: "https://login.tailscale.com/admin"
+    target: "_blank"
+
+services:
+  - name: "📊 System Status"
+    icon: "fas fa-heartbeat"
+    items:
+      - name: "Pi System Stats"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/raspberry-pi.png"
+        subtitle: "CPU, RAM, Disk, Network"
+        url: "https://stats.karant.dev"
+        target: "_blank"
+        type: "Glances"
+        endpoint: "http://localhost:61208"
+        stats: [cpu, mem]
+        # Click → goes to stats.karant.dev
+        # Stats → fetched from localhost:61208
+
+      - name: "Portainer"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/portainer.png"
+        subtitle: "Docker Containers"
+        url: "https://portainer.karant.dev"
+        target: "_blank"
+        type: "Portainer"
+        endpoint: "1"
+        apikey: "YOUR_PORTAINER_API_KEY" # Replace with your Portainer API key
+        # Click → goes to portainer.karant.dev
+        # Stats → fetched from portainer.karant.dev API
+
+  - name: "🎬 Media Server"
+    icon: "fas fa-film"
+    items:
+      - name: "Plex"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/plex.png"
+        subtitle: "Stream anywhere"
+        url: "https://plex.karant.dev"
+        target: "_blank"
+        type: "Tautulli"
+        endpoint: "http://172.20.0.9:8181"
+        apikey: "YOUR_TAUTULLI_API_KEY" # Replace with your Tautulli API key
+        # Click → goes to plex.karant.dev
+        # Stats → fetched from internal Tautulli IP
+
+      - name: "Tautulli"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
+        subtitle: "Plex Statistics"
+        url: "https://tautulli.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "📥 Downloads"
+    icon: "fas fa-download"
+    items:
+      - name: "Transmission"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/transmission.png"
+        subtitle: "Torrent Client (VPN)"
+        url: "https://trsm.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        # Just a link with status check
+
+      - name: "Prowlarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
+        subtitle: "Indexer Manager (VPN)"
+        url: "https://prowlarr.karant.dev"
+        target: "_blank"
+        type: "Prowlarr"
+        endpoint: "http://172.20.0.6:9696"
+        apikey: "YOUR_PROWLARR_API_KEY" # Replace with your Prowlarr API key
+        # Click → goes to prowlarr.karant.dev
+        # Stats → fetched from internal IP
+
+  - name: "🏠 Smart Home"
+    icon: "fas fa-home"
+    items:
+      - name: "Homebridge"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homebridge.png"
+        subtitle: "HomeKit Bridge"
+        url: "https://hb.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "🛠️ Tools & Utilities"
+    icon: "fas fa-toolbox"
+    items:
+      - name: "IT Tools"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/it-tools.png"
+        subtitle: "Developer Utilities"
+        url: "https://it.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Filebrowser"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/filebrowser.png"
+        subtitle: "File Manager"
+        url: "https://fb.karant.dev"
+        target: "_blank"
+        endpoint: "http://172.20.0.5:8080"
+        type: "Ping"

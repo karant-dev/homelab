@@ -1,0 +1,147 @@
+{
+    email karant.dev@gmail.com
+}
+
+# CORS Snippet - handles preflight and CORS headers
+(cors) {
+    @cors_preflight method OPTIONS
+    @cors header Origin {args.0}
+
+    handle @cors_preflight {
+        header Access-Control-Allow-Origin "{args.0}"
+        header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Requested-With"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Max-Age "3600"
+        respond "" 204
+    }
+
+    handle @cors {
+        header Access-Control-Allow-Origin "{args.0}"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Expose-Headers "Link"
+    }
+}
+
+# Homer Dashboard
+homelab.karant.dev {
+    reverse_proxy localhost:8085 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Homebridge
+hb.karant.dev {
+    reverse_proxy localhost:8581 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Transmission
+trsm.karant.dev {
+    reverse_proxy localhost:9091 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Plex
+plex.karant.dev {
+    reverse_proxy localhost:32400 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Filebrowser
+files.karant.dev {
+    reverse_proxy localhost:8080 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# IT Tools
+ittools.karant.dev {
+    reverse_proxy localhost:8081 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Portainer
+portainer.karant.dev {
+    reverse_proxy localhost:9443 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Prowlarr
+prowlarr.karant.dev {
+    reverse_proxy localhost:9696 {
+        header_up Host {host}
+    }
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Sonarr
+sonarr.karant.dev {
+    reverse_proxy localhost:8989
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Radarr
+radarr.karant.dev {
+    reverse_proxy localhost:7878
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Lidarr
+lidarr.karant.dev {
+    reverse_proxy localhost:8686
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Glances -- monitoring
+stats.karant.dev {
+    reverse_proxy localhost:61208
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+
+# Tautulli -- Plex monitoring
+tautulli.karant.dev {
+    reverse_proxy localhost:8181
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
