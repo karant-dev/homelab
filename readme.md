@@ -1,6 +1,6 @@
 # Homelab
 
-> **Note:** This README is a placeholder and will be updated with real content as my homelab grows and evolves.
+> **Note:** This is an evolving homelab. Readme might be slightly behind actual state.
 
 ## What is this?
 
@@ -8,9 +8,7 @@ Basic documentation for my personal homelab setup. Sections below are placeholde
 
 ## Hardware
 
-- `MAIN_SERVER` - *details pending*
-- `RASPBERRY_PI_4` - *to be added*
-- `NETWORK_SWITCH` - *TBD*
+- `MAIN_SERVER` - Raspberry Pi 5 8 GB
 
 ## Software & Services
 
@@ -20,12 +18,10 @@ Basic documentation for my personal homelab setup. Sections below are placeholde
   - Caddyfile in this repo: homelab/configs/Caddyfile
   - Environment variables used by Caddy and DNS plugins:
     - CLOUDFLARE_API_TOKEN — Cloudflare API token for DNS challenge
-    - CADDY_EMAIL — contact email for ACME registrations
   - Do NOT commit tokens/emails. Use a gitignored .env or set system environment variables.
 - `TAILSCALE` / Tailnet — this system is joined to my Tailnet, providing private, secure access to the homelab when off the home Wi‑Fi network. A records have been created in Cloudflare pointing to the homelab's Tailnet IP, and subdomains are routed to their respective services.
 - `DOCKER` / Docker Compose — most services run as containers (see docker-compose/*.yml)
 - `PLEX_MEDIA_SERVER` - *deployed via Docker Compose*
-- `PI_HOLE` - *planned / deployed via Docker Compose*
 
 ## Setup Notes
 
@@ -40,10 +36,8 @@ Basic documentation for my personal homelab setup. Sections below are placeholde
 - Recommended: store secrets in a password manager (e.g., Bitwarden) and inject into the host environment or a gitignored .env file.
 - Example .env variables to set (DO NOT commit .env):
   - OPENVPN_USERNAME, OPENVPN_PASSWORD
-  - PIHOLE_WEBPASSWORD
   - PLEX_CLAIM
   - CLOUDFLARE_API_TOKEN
-  - CADDY_EMAIL
 
 ## To-Do
 
