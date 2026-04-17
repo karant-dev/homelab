@@ -1,5 +1,5 @@
 {
-	email example.com@gmail.com
+	email ${DOMAIN}@gmail.com
 }
 
 # ───────────────────────── Snippets ─────────────────────────
@@ -42,7 +42,7 @@
 
 # Simple Homer-frontend site (CORS + reverse proxy)
 (homer_site) {
-	import cors https://https://homelab.example.com
+	import cors https://${HOMER_ORIGIN}
 	import site {args.0}
 }
 
@@ -62,7 +62,7 @@
 (homer_headers_all) {
 	@all path *
 	header @all {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With"
@@ -75,7 +75,7 @@
 (homer_headers_all_transmission) {
 	@all path *
 	header @all {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With, X-Transmission-Session-Id"
@@ -88,7 +88,7 @@
 (homer_headers_api) {
 	@api path /api/*
 	header @api {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With"
@@ -101,7 +101,7 @@
 (homer_headers_api_ext) {
 	@api path /api/*
 	header @api {
-		# Access-Control-Allow-Origin https://https://homelab.example.com
+		# Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Origin chrome-extension://kgcjekpmcjjogibpjebkhaanilehneje
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -123,7 +123,7 @@
 # ───────────────────────── Sites ─────────────────────────
 
 # Cockpit web console
-cockpit.example.com {
+cockpit.${DOMAIN} {
 	reverse_proxy localhost:9090 {
 		header_up Host {host}
 		transport http {
@@ -134,19 +134,19 @@ cockpit.example.com {
 }
 
 # Homer Dashboard
-https://homelab.example.com {
+${HOMER_ORIGIN} {
 	import site localhost:8085
 	import cloudflare_dns
 }
 
 # Homebridge
-hb.example.com {
+hb.${DOMAIN} {
 	import homer_site localhost:8581
 	import cloudflare_dns
 }
 
 # Transmission
-trsm.example.com {
+trsm.${DOMAIN} {
 	reverse_proxy localhost:9091 {
 		import strip_down_cors
 	}
@@ -156,7 +156,7 @@ trsm.example.com {
 }
 
 # qBitTorrent
-qbit.example.com {
+qbit.${DOMAIN} {
 	reverse_proxy localhost:8086 {
 		header_up Origin ""
 		header_up Referer ""
@@ -164,9 +164,9 @@ qbit.example.com {
 		import strip_down_cors_full
 	}
 
-	@origin header Origin https://https://homelab.example.com
+	@origin header Origin https://${HOMER_ORIGIN}
 	header @origin {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "*"
@@ -176,7 +176,7 @@ qbit.example.com {
 }
 
 # MeTube - Youtube Downloader
-metube.example.com {
+metube.${DOMAIN} {
 	reverse_proxy localhost:9081 {
 		header_up Origin ""
 		header_up Referer ""
@@ -184,9 +184,9 @@ metube.example.com {
 		import strip_down_cors_full
 	}
 
-	@origin header Origin https://https://homelab.example.com
+	@origin header Origin https://${HOMER_ORIGIN}
 	header @origin {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "*"
@@ -196,12 +196,12 @@ metube.example.com {
 }
 
 # Plex
-plex.example.com {
+plex.${DOMAIN} {
 	import homer_site localhost:32400
 }
 
 # Tautulli -- Plex monitoring
-tautulli.example.com {
+tautulli.${DOMAIN} {
 	# Remove any upstream ACAO/Vary so we can set exactly one
 	reverse_proxy localhost:8181 {
 		import strip_down_cors
@@ -212,7 +212,7 @@ tautulli.example.com {
 }
 
 # Jellyfin
-jelly.example.com {
+jelly.${DOMAIN} {
 	reverse_proxy localhost:8096 {
 		import strip_down_cors
 	}
@@ -222,7 +222,7 @@ jelly.example.com {
 }
 
 # Navidrome
-music.example.com {
+music.${DOMAIN} {
 	reverse_proxy localhost:4533 {
 		import strip_down_cors
 	}
@@ -232,7 +232,7 @@ music.example.com {
 }
 
 # Audiobookshelf
-podcasts.example.com {
+podcasts.${DOMAIN} {
 	reverse_proxy localhost:13378 {
 		import strip_down_cors
 	}
@@ -242,7 +242,7 @@ podcasts.example.com {
 }
 
 # Music Grabber
-music-dl.example.com {
+music-dl.${DOMAIN} {
 	reverse_proxy localhost:38274 {
 		import strip_down_cors
 	}
@@ -252,7 +252,7 @@ music-dl.example.com {
 }
 
 # Tracearr -- Plex and Jellyfin monitoring
-tracearr.example.com {
+tracearr.${DOMAIN} {
 	# Remove any upstream ACAO/Vary so we can set exactly one
 	reverse_proxy localhost:8099 {
 		import strip_down_cors
@@ -263,12 +263,12 @@ tracearr.example.com {
 }
 
 # Copyparty
-files.example.com {
+files.${DOMAIN} {
 
     # Homer liveness endpoint (CORS-safe)
     @health path /_homer/health
     handle @health {
-        header Access-Control-Allow-Origin https://https://homelab.example.com
+        header Access-Control-Allow-Origin https://${HOMER_ORIGIN}
         header Access-Control-Allow-Credentials true
         respond "ok" 200
     }
@@ -285,50 +285,50 @@ files.example.com {
 }
 
 # Open WebUI
-chat.example.com {
-	import cors https://https://homelab.example.com
+chat.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 	import site_strip_cors localhost:10001
 }
 
 # IT Tools
-ittools.example.com {
+ittools.${DOMAIN} {
 	import homer_site localhost:8081
 	import cloudflare_dns
 }
 
 # Network Tools
-nettools.example.com {
+nettools.${DOMAIN} {
 	import homer_site localhost:8082
 	import cloudflare_dns
 }
 
 # BentoPDF Tools
-pdftools.example.com {
+pdftools.${DOMAIN} {
 	import homer_site localhost:8100
 	import cloudflare_dns
 }
 
 # Beaver Habits
-habits.example.com {
+habits.${DOMAIN} {
 	import homer_site localhost:8101
 	import cloudflare_dns
 }
 
 # Memos
-memos.example.com {
+memos.${DOMAIN} {
 	import homer_site localhost:8102
 	import cloudflare_dns
 }
 
 # VS Code server
-code.example.com {
+code.${DOMAIN} {
 	import homer_site localhost:8888
 	import cloudflare_dns
 }
 
 # n8n - Workflow Automation
-n8n.example.com {
-	import cors https://https://homelab.example.com
+n8n.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:5678 {
 		header_up Host {host}
@@ -339,8 +339,8 @@ n8n.example.com {
 }
 
 # Portainer
-portainer.example.com {
-	import cors https://https://homelab.example.com
+portainer.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:9443 {
 		transport http {
@@ -352,7 +352,7 @@ portainer.example.com {
 }
 
 # Prowlarr
-prowlarr.example.com {
+prowlarr.${DOMAIN} {
 	reverse_proxy localhost:9696 {
 		import strip_down_cors
 	}
@@ -362,8 +362,8 @@ prowlarr.example.com {
 }
 
 # Sonarr
-sonarr.example.com {
-	import cors https://https://homelab.example.com
+sonarr.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:8989 {
 		import strip_down_cors
@@ -374,8 +374,8 @@ sonarr.example.com {
 }
 
 # Lidarr
-lidarr.example.com {
-	import cors https://https://homelab.example.com
+lidarr.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:8686 {
 		import strip_down_cors
@@ -386,8 +386,8 @@ lidarr.example.com {
 }
 
 # Radarr
-radarr.example.com {
-	import cors https://https://homelab.example.com
+radarr.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:7878 {
 		import strip_down_cors
@@ -398,8 +398,8 @@ radarr.example.com {
 }
 
 # Bazarr
-bazarr.example.com {
-	import cors https://https://homelab.example.com
+bazarr.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:6767 {
 		import strip_down_cors
@@ -410,7 +410,7 @@ bazarr.example.com {
 }
 
 # Overseerr
-seerr.example.com {
+seerr.${DOMAIN} {
 	reverse_proxy http://localhost:5056 {
 		header_up Host {host}
 		import strip_down_cors
@@ -421,8 +421,8 @@ seerr.example.com {
 }
 
 # Profilarr
-profilarr.example.com {
-	import cors https://https://homelab.example.com
+profilarr.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
 
 	reverse_proxy localhost:6868 {
 		import strip_down_cors
@@ -432,8 +432,8 @@ profilarr.example.com {
 	import cloudflare_dns
 }
 
-# stats.example.com — Glances
-stats.example.com {
+# stats.${DOMAIN} — Glances
+stats.${DOMAIN} {
 	reverse_proxy localhost:61208 {
 		import strip_down_cors
 	}
@@ -443,7 +443,7 @@ stats.example.com {
 }
 
 # Karakeep -- Bookmark manager
-bookmarks.example.com {
+bookmarks.${DOMAIN} {
 	reverse_proxy localhost:8103 {
 		import strip_down_cors
 	}
@@ -453,7 +453,7 @@ bookmarks.example.com {
 }
 
 # Glass Keep -- Self-hosted Google Keep
-keep.example.com {
+keep.${DOMAIN} {
 	reverse_proxy localhost:8104 {
 		import strip_down_cors
 	}
@@ -463,7 +463,7 @@ keep.example.com {
 }
 
 # Mealie -- Self-hosted Recipe Manager
-recipes.example.com {
+recipes.${DOMAIN} {
 	reverse_proxy localhost:10000 {
 		import strip_down_cors
 	}
@@ -473,7 +473,7 @@ recipes.example.com {
 }
 
 # Actual -- Self-hosted budgeting
-budget.example.com {
+budget.${DOMAIN} {
 	import homer_site localhost:10001
 
 	# import homer_headers_api
@@ -481,7 +481,7 @@ budget.example.com {
 }
 
 # Dozzle -- Pretty Docker logs
-dozzle.example.com {
+dozzle.${DOMAIN} {
 	reverse_proxy localhost:9002 {
 		import strip_down_cors
 	}
@@ -491,7 +491,7 @@ dozzle.example.com {
 }
 
 # Nextcloud AIO
-cloud.example.com {
+cloud.${DOMAIN} {
     reverse_proxy localhost:11000 {
         header_up Host {host}
         header_up X-Forwarded-Proto {scheme}
@@ -504,7 +504,7 @@ cloud.example.com {
 }
 
 # Nextcloud AIO Admin UI
-cloud-admin.example.com {
+cloud-admin.${DOMAIN} {
     reverse_proxy localhost:11001 {
         transport http {
             tls_insecure_skip_verify

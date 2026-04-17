@@ -15,7 +15,7 @@ services:
     networks:
       - homelab-net
     volumes:
-      - /home/karant/docker-data/ollama:/root/.ollama
+      - ${DATA_ROOT}/ollama:/root/.ollama
     deploy:
       resources:
         limits:
@@ -35,7 +35,7 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
     volumes:
-      - /home/karant/docker-data/open-webui:/app/backend/data
+      - ${DATA_ROOT}/open-webui:/app/backend/data
     depends_on:
       - ollama
     deploy:

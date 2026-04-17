@@ -9,12 +9,12 @@ services:
     cpus: 3.0
     pids_limit: 400
     environment:
-      - TZ=Europe/Dublin
-      - PLEX_CLAIM=REDACTED
+      - TZ=${TZ}
+      - PLEX_CLAIM=${PLEX_CLAIM}
     volumes:
-      - /home/karant/docker-data/plex/config:/config
-      - /home/karant/docker-data/plex/transcode:/transcode
-      - /mnt/media:/media
+      - ${DATA_ROOT}/plex/config:/config
+      - ${DATA_ROOT}/plex/transcode:/transcode
+      - ${MEDIA_ROOT}:/media
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -29,9 +29,9 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/tautulli/config:/config
+      - ${DATA_ROOT}/tautulli/config:/config
     ports:
       - "8181:8181"
     networks:
@@ -55,12 +55,12 @@ services:
     cpus: 1.0 # Bumped up since it runs Postgres, Redis, and Node
     pids_limit: 300 # Increased to handle the multiple bundled services
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
       # Note: PUID and PGID are omitted because the official Tracearr image doesn't use standard linuxserver.io privilege dropping.
     volumes:
-      - /home/karant/docker-data/tracearr/postgres:/data/postgres
-      - /home/karant/docker-data/tracearr/redis:/data/redis
-      - /home/karant/docker-data/tracearr/data:/app/data
+      - ${DATA_ROOT}/tracearr/postgres:/data/postgres
+      - ${DATA_ROOT}/tracearr/redis:/data/redis
+      - ${DATA_ROOT}/tracearr/data:/app/data
     ports:
       - "8099:3000"
     networks:
@@ -86,10 +86,10 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/jellyfin/config:/config
-      - /mnt/media:/media
+      - ${DATA_ROOT}/jellyfin/config:/config
+      - ${MEDIA_ROOT}:/media
     ports:
       - "8096:8096"
     restart: unless-stopped
@@ -119,19 +119,19 @@ services:
     environment:
       - DRYRUN=False
       - LOG_LEVEL=INFO
-      - TZ=Europe/Dublin
-      - PLEX_TOKEN=REDACTED
+      - TZ=${TZ}
+      - PLEX_TOKEN=${JELLYPLEX_PLEX_TOKEN}
       - PLEX_BASEURL=http://192.168.0.50:32400
       - SSL_BYPASS=False
       - JELLYFIN_BASEURL=http://jellyfin:8096
-      - JELLYFIN_TOKEN=REDACTED
+      - JELLYFIN_TOKEN=${JELLYPLEX_JELLYFIN_TOKEN}
       - SYNC_FROM_PLEX_TO_JELLYFIN=True
       - GENERATE_LOCATIONS=True
       - MAX_THREADS=2
       - USER_MAPPING={"karanthakkar97":"karan"}
       - LIBRARY_MAPPING={"TV Shows":"TV"}
     volumes:
-      - /home/karant/docker-data/jellyplex-watched:/config
+      - ${DATA_ROOT}/jellyplex-watched:/config
     networks:
       - homelab-net
     healthcheck:
@@ -156,7 +156,7 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - /mnt/media:/srv
+      - ${MEDIA_ROOT}:/srv
     restart: unless-stopped
     networks:
       - homelab-net
@@ -171,8 +171,8 @@ services:
     ports:
       - "8090:3923"
     volumes:
-      - /mnt/media:/w
-      - /home/karant/docker-data/copyparty:/cfg
+      - ${MEDIA_ROOT}:/w
+      - ${DATA_ROOT}/copyparty:/cfg
     networks:
       - homelab-net
     healthcheck:
@@ -196,8 +196,8 @@ services:
     - DOWNLOAD_MODE=limited
     - TEMP_DIR=/tmp
     volumes:
-      - /mnt/media/data/completed/youtube:/downloads
-      - /home/karant/docker-data/metube/config:/app/config
+      - ${MEDIA_ROOT}/data/completed/youtube:/downloads
+      - ${DATA_ROOT}/metube/config:/app/config
     networks:
       - homelab-net
     ports:
@@ -224,9 +224,9 @@ services:
     restart: unless-stopped
     network_mode: host
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/isponsorblocktv:/app/data
+      - ${DATA_ROOT}/isponsorblocktv:/app/data
     healthcheck:
       test: ["CMD-SHELL", "tr '\\0' ' ' </proc/1/cmdline | grep -qi 'main.pyc'"]
       interval: 10s
@@ -247,7 +247,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
       - MUSIC_DIR=/music
       - DB_PATH=/data/music_grabber.db
       - ENABLE_MUSICBRAINZ=true
@@ -255,10 +255,10 @@ services:
       - NAVIDROME_URL=http://navidrome:4533
       - NAVIDROME_USER=karant
       - NAVIDROME_PASS=Navidrome
-      - ACOUSTID_API_KEY=REDACTED
+      - ACOUSTID_API_KEY=${MUSICGRABBER_ACOUSTID_API_KEY}
     volumes:
-      - /home/karant/docker-data/musicgrabber/data:/data
-      - /mnt/media/Music:/music
+      - ${DATA_ROOT}/musicgrabber/data:/data
+      - ${MEDIA_ROOT}/Music:/music
     ports:
       - "38274:8080"
     networks:
@@ -284,12 +284,12 @@ services:
       - ND_LOGLEVEL=info
       - ND_SESSIONTIMEOUT=24h
       - ND_BASEURL=
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
       - PUID=1000
       - PGID=1000
     volumes:
-      - /home/karant/docker-data/navidrome:/data
-      - /mnt/media/Music:/music:ro
+      - ${DATA_ROOT}/navidrome:/data
+      - ${MEDIA_ROOT}/Music:/music:ro
     ports:
       - "4533:4533"
     networks:
@@ -314,14 +314,14 @@ services:
       - 1.1.1.1
       - 8.8.8.8
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
       - PUID=1000
       - PGID=1000
     volumes:
-      - /home/karant/docker-data/audiobookshelf/config:/config
-      - /home/karant/docker-data/audiobookshelf/metadata:/metadata
-      - /mnt/media/Audiobooks:/audiobooks
-      - /mnt/media/Podcasts:/podcasts
+      - ${DATA_ROOT}/audiobookshelf/config:/config
+      - ${DATA_ROOT}/audiobookshelf/metadata:/metadata
+      - ${MEDIA_ROOT}/Audiobooks:/audiobooks
+      - ${MEDIA_ROOT}/Podcasts:/podcasts
     ports:
       - "13378:80"
     networks:
@@ -342,13 +342,13 @@ services:
     cpus: 1.0
     pids_limit: 150
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
       - PUID=1000
       - PGID=1000
       - ROMM_AUTH_ENABLED=true
     volumes:
-      - /home/karant/docker-data/romm:/config
-      - /mnt/media/ROMs:/roms
+      - ${DATA_ROOT}/romm:/config
+      - ${MEDIA_ROOT}/ROMs:/roms
     ports:
       - "8088:8080"
     networks:

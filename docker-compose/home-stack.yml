@@ -11,13 +11,13 @@ services:
         limits:
           memory: 1000M
     volumes:
-      - /home/karant/docker-data/mealie/data:/app/data
+      - ${DATA_ROOT}/mealie/data:/app/data
     environment:
       - ALLOW_SIGNUP=false
       - TOKEN_TIME=9600
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     networks:
       - homelab-net
 
@@ -29,11 +29,11 @@ services:
   #   ports:
   #     - "10001:5006"
   #   volumes:
-  #     - /home/karant/docker-data/actual-budget/data:/data
+  #     - ${DATA_ROOT}/actual-budget/data:/data
   #   environment:
   #     - PUID=1000
   #     - PGID=1000
-  #     - TZ=Europe/Dublin
+  #     - TZ=${TZ}
   #   networks:
   #     - homelab-net
 

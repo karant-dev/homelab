@@ -28,7 +28,7 @@ services:
       # --- SURFSHARK WIREGUARD SETUP ---
       - VPN_SERVICE_PROVIDER=surfshark
       - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=REDACTED
+      - WIREGUARD_PRIVATE_KEY=${GLUETUN_WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=10.14.0.2/16  # Copy from Surfshark dashboard
       - WIREGUARD_MTU=1280
       - SERVER_COUNTRIES=Netherlands      # Or your preferred P2P friendly location
@@ -38,8 +38,8 @@ services:
       # --- ALTERNATIVE: PIA OPENVPN (Uncomment if switching to PIA) ---
       # - VPN_SERVICE_PROVIDER=private internet access
       # - VPN_TYPE=openvpn
-      # - OPENVPN_USER=REDACTED
-      # - OPENVPN_PASSWORD=REDACTED
+      # - OPENVPN_USER=${GLUETUN_OPENVPN_USER}
+      # - OPENVPN_PASSWORD=${GLUETUN_OPENVPN_PASSWORD}
       # - VPN_PORT_FORWARDING=on  # <--- The Magic Switch for PIA
     restart: unless-stopped
     healthcheck:
@@ -63,8 +63,8 @@ services:
       - PGID=1000
       - WEBUI_PORT=8080
     volumes:
-      - /home/karant/docker-data/qbittorrent/config:/config
-      - /mnt/media/data:/data
+      - ${DATA_ROOT}/qbittorrent/config:/config
+      - ${MEDIA_ROOT}/data:/data
     network_mode: "service:gluetun" # Hooks into the VPN network
     depends_on:
       gluetun:
@@ -90,7 +90,7 @@ services:
       - PUID=1000
       - PGID=1000
     volumes:
-      - /home/karant/docker-data/arr/prowlarr/config:/config
+      - ${DATA_ROOT}/arr/prowlarr/config:/config
     network_mode: "service:gluetun"
     # No healthcheck needed for Prowlarr strictly, but it rides the VPN
     depends_on:
@@ -125,12 +125,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/sonarr/config:/config
-      - /mnt/media/TV:/tv
+      - ${DATA_ROOT}/arr/sonarr/config:/config
+      - ${MEDIA_ROOT}/TV:/tv
       # CRITICAL: Allows Sonarr to see qBit downloads at the same path
-      - /mnt/media/data:/data 
+      - ${MEDIA_ROOT}/data:/data 
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8989/ping && curl -Is --connect-timeout 5 https://google.com || exit 1"]
@@ -155,12 +155,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/radarr/config:/config
-      - /mnt/media/Movies:/movies
+      - ${DATA_ROOT}/arr/radarr/config:/config
+      - ${MEDIA_ROOT}/Movies:/movies
       # CRITICAL: Allows Radarr to see qBit downloads at the same path
-      - /mnt/media/data:/data
+      - ${MEDIA_ROOT}/data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:7878/ping && curl -Is --connect-timeout 5 https://google.com || exit 1"]
@@ -185,11 +185,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/lidarr/config:/config
-      - /mnt/media/Music:/music
-      - /mnt/media/data:/data
+      - ${DATA_ROOT}/arr/lidarr/config:/config
+      - ${MEDIA_ROOT}/Music:/music
+      - ${MEDIA_ROOT}/data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8686/ping && curl -Is --connect-timeout 5 https://google.com || exit 1"]
@@ -214,11 +214,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/bazarr/config:/config
-      - /mnt/media/Movies:/movies
-      - /mnt/media/TV:/tv
+      - ${DATA_ROOT}/arr/bazarr/config:/config
+      - ${MEDIA_ROOT}/Movies:/movies
+      - ${MEDIA_ROOT}/TV:/tv
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:6767/ping && curl -Is --connect-timeout 5 https://google.com || exit 1"]
@@ -243,12 +243,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/bookshelf/config:/config
-      - /mnt/media/Audiobooks:/audiobooks
-      - /mnt/media/eBooks:/ebooks
-      - /mnt/media/data:/data
+      - ${DATA_ROOT}/arr/bookshelf/config:/config
+      - ${MEDIA_ROOT}/Audiobooks:/audiobooks
+      - ${MEDIA_ROOT}/eBooks:/ebooks
+      - ${MEDIA_ROOT}/data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8787/ping || exit 1"]
@@ -269,10 +269,10 @@ services:
     - 1.1.1.1
     - 8.8.8.8
    environment:
-    - TZ=Europe/Dublin
+    - TZ=${TZ}
     - LOG_LEVEL=debug
    volumes:
-    - /home/karant/docker-data/arr/seerr/config:/app/config
+    - ${DATA_ROOT}/arr/seerr/config:/app/config
    healthcheck:
     test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1"]
     start_period: 20s
@@ -294,7 +294,7 @@ services:
       - PUID=1000
       - PGID=1000
       - LOG_LEVEL=info
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8191/"]
@@ -316,9 +316,9 @@ services:
       gluetun:
         condition: service_healthy
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/arr/profilarr/config:/config
+      - ${DATA_ROOT}/arr/profilarr/config:/config
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "cat /proc/1/cmdline | tr '\\0' ' ' | grep -q gunicorn && cat /proc/1/cmdline | tr '\\0' ' ' | grep -q 6868"]

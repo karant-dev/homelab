@@ -8,12 +8,12 @@ services:
     pids_limit: 150
     restart: unless-stopped
     environment:
-    - TZ=Europe/Dublin
+    - TZ=${TZ}
     ports:
       - "8081:80"
     volumes:
-      - /home/karant/docker-data/ittools/config:/config
-      - /home/karant/docker-data/ittools/data:/data
+      - ${DATA_ROOT}/ittools/config:/config
+      - ${DATA_ROOT}/ittools/data:/data
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[n]ginx' >/dev/null || pgrep -f '[/]it-tools' >/dev/null || pgrep -f '[n]ode' >/dev/null || exit 1"]
       interval: 30s
@@ -39,7 +39,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -55,15 +55,15 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Dublin
-      - PASSWORD=REDACTED
-      - SUDO_PASSWORD=REDACTED
+      - TZ=${TZ}
+      - PASSWORD=${CODE_SERVER_PASSWORD}
+      - SUDO_PASSWORD=${CODE_SERVER_SUDO_PASSWORD}
       - PORT=8080
       - CERT=FALSE
     volumes:
-      - /home/karant/docker-data/code-server/config:/config
+      - ${DATA_ROOT}/code-server/config:/config
       - /etc/caddy:/workspace/caddy
-      - /home/karant/docker-data:/workspace/docker-data
+      - ${DATA_ROOT}:/workspace/docker-data
     ports:
       - "8888:8080"
     restart: unless-stopped
@@ -88,19 +88,19 @@ services:
     pids_limit: 250
     restart: unless-stopped
     environment:
-      - N8N_HOST=n8n.karant.dev
+      - N8N_HOST=n8n.${DOMAIN}
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n-hooks.karant.dev/
-      - GENERIC_TIMEZONE=Europe/Dublin
-      - TZ=Europe/Dublin
-      - N8N_EDITOR_BASE_URL=https://n8n.karant.dev/
+      - WEBHOOK_URL=https://n8n-hooks.${DOMAIN}/
+      - GENERIC_TIMEZONE=${TZ}
+      - TZ=${TZ}
+      - N8N_EDITOR_BASE_URL=https://n8n.${DOMAIN}/
       - N8N_SECURE_COOKIE=false
-      - TELEGRAM_CHAT_ID=8110070007
+      - TELEGRAM_CHAT_ID=${N8N_TELEGRAM_CHAT_ID}
     ports:
       - "5678:5678"
     volumes:
-      - /home/karant/docker-data/n8n:/home/node/.n8n
+      - ${DATA_ROOT}/n8n:/home/node/.n8n
     networks:
       - homelab-net
     healthcheck:
