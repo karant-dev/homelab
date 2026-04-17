@@ -94,6 +94,90 @@ Services grouped by Docker Compose stack based on container labels.
 - **Standalone Containers (No Stack):**
   - `portainer`: Container management GUI.
 
+## Architecture
+
+```mermaid
+flowchart TD
+
+    %% External
+    CF[Cloudflare DNS<br/>*.karant.dev]
+    TS[Tailscale<br/>Remote Access]
+
+    %% Host
+    HOST[Main Server<br/>Ryzen 7 / 32GB / 1TB]
+
+    %% System Services
+    CADDY[Caddy<br/>Reverse Proxy + TLS]
+    DOCKER[Docker Engine]
+
+    %% Storage
+    STORAGE[16TB External HDD]
+
+    %% Stacks
+    subgraph ADMIN[Admin Stack]
+        A1[autohealer]
+        A2[cloudflared]
+        A3[homer]
+        A4[watchtower]
+        A5[glances]
+    end
+
+    subgraph AI[AI Stack]
+        AI1[ollama]
+        AI2[open-webui]
+    end
+
+    subgraph ARR[Arr Stack]
+        R1[radarr]
+        R2[sonarr]
+        R3[prowlarr]
+        R4[qbittorrent]
+        R5[gluetun VPN]
+    end
+
+    subgraph DEV[Dev Stack]
+        D1[code-server]
+        D2[n8n]
+        D3[network-tools]
+    end
+
+    subgraph MEDIA[Media Stack]
+        M1[plex]
+        M2[jellyfin]
+        M3[navidrome]
+        M4[audiobookshelf]
+        M5[tautulli]
+    end
+
+    subgraph PROD[Productivity]
+        P1[memos]
+        P2[actual]
+        P3[mealie]
+    end
+
+    subgraph HOME[Smart Home]
+        H1[homebridge]
+    end
+
+    %% Relationships
+    CF --> TS
+    TS --> HOST
+
+    HOST --> CADDY
+    HOST --> DOCKER
+    STORAGE --> HOST
+
+    CADDY --> DOCKER
+
+    DOCKER --> ADMIN
+    DOCKER --> AI
+    DOCKER --> ARR
+    DOCKER --> DEV
+    DOCKER --> MEDIA
+    DOCKER --> PROD
+    DOCKER --> HOME
+```
+
 ## Setup Notes
 
 - Caddy: installed as a system service (systemd). It reads `configs/Caddyfile` in this repo.
