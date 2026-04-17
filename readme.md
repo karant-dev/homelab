@@ -1,192 +1,118 @@
-# Homelab
+# Homelab One-Command Template
 
-> **Note:** This is an evolving homelab. Readme might be slightly behind actual state.
+Reusable Docker-based homelab template for Debian/Ubuntu hosts.
 
-## What is this?
+## Quick start
 
-Basic documentation for my personal homelab setup. Sections below organize notes and configs.
-
-## Architecture
-
-```mermaid
-flowchart TD
-
-    %% External
-    CF[Cloudflare DNS<br/>*.karant.dev]
-    TS[Tailscale<br/>Remote Access]
-
-    %% Host
-    HOST[Main Server<br/>Ryzen 7 / 32GB / 1TB]
-
-    %% System Services
-    CADDY[Caddy<br/>Reverse Proxy + TLS]
-    DOCKER[Docker Engine]
-
-    %% Storage
-    STORAGE[16TB External HDD]
-
-    %% Stacks
-    subgraph ADMIN[Admin Stack]
-        A1[autohealer]
-        A2[cloudflared]
-        A3[homer]
-        A4[watchtower]
-        A5[glances]
-    end
-
-    subgraph AI[AI Stack]
-        AI1[ollama]
-        AI2[open-webui]
-    end
-
-    subgraph ARR[Arr Stack]
-        R1[radarr]
-        R2[sonarr]
-        R3[prowlarr]
-        R4[qbittorrent]
-        R5[gluetun VPN]
-    end
-
-    subgraph DEV[Dev Stack]
-        D1[code-server]
-        D2[n8n]
-        D3[network-tools]
-    end
-
-    subgraph MEDIA[Media Stack]
-        M1[plex]
-        M2[jellyfin]
-        M3[navidrome]
-        M4[audiobookshelf]
-        M5[tautulli]
-    end
-
-    subgraph PROD[Productivity]
-        P1[memos]
-        P2[actual]
-        P3[mealie]
-    end
-
-    subgraph HOME[Smart Home]
-        H1[homebridge]
-    end
-
-    %% Relationships
-    CF --> TS
-    TS --> HOST
-
-    HOST --> CADDY
-    HOST --> DOCKER
-    STORAGE --> HOST
-
-    CADDY --> DOCKER
-
-    DOCKER --> ADMIN
-    DOCKER --> AI
-    DOCKER --> ARR
-    DOCKER --> DEV
-    DOCKER --> MEDIA
-    DOCKER --> PROD
-    DOCKER --> HOME
+```bash
+git clone https://github.com/<your-user>/homelab.git
+cd homelab
+cp .env.example .env
+# edit .env with your domain + secrets
+./install.sh
+./up.sh
 ```
 
-## Hardware
+Start only selected stacks:
 
-- `MAIN_SERVER` - Bosgame M4 (Ryzen 7 6800H, 32GB DDR5 RAM, 1TB SSD)
-- `STORAGE` - 16TB Seagate External HDD
+```bash
+./up.sh admin media dev
+```
 
-## Software & Services
+Stop all or selected stacks:
 
-This section details the software, services and stacks that comprise the homelab.
+```bash
+./down.sh
+./down.sh media arr
+```
 
-### System-level Software
+## Repository layout
 
-Services installed directly on the host operating system.
+```text
+.
+├── configs/
+│   ├── Caddyfile
+│   ├── Caddyfile.template
+│   ├── homer.yml
+│   └── homer.yml.template
+├── docker-compose/
+│   ├── admin-stack.yml
+│   ├── ai-stack.yml
+│   ├── arr-stack.yml
+│   ├── dev-stack.yml
+│   ├── home-stack.yml
+│   ├── media-stack.yml
+│   ├── productivity-stack.yml
+│   └── smarthome-stack.yml
+├── scripts/
+│   └── render-configs.sh
+├── .env.example
+├── install.sh
+├── up.sh
+└── down.sh
+```
 
-- **Caddy:** Web server with automatic HTTPS. Installed system-wide as reverse proxy. Handles routing for many internal ports.
-  - Caddyfile located at `configs/Caddyfile`.
-  - Built with Cloudflare DNS plugin for ACME DNS challenges.
-- **Docker & Docker Compose:** Containerization platform. Compose files located in `docker-compose` directory.
-- **Tailscale:** Secure network (tailnet) for accessing homelab remotely.
+## Architecture (brief)
 
-### Docker Stacks & Containers
+- Host-level components: Docker Engine, Docker Compose plugin, Caddy, Tailscale.
+- App components: grouped in independent Docker Compose stacks under `docker-compose/`.
+- Shared configuration: `.env` + runtime templating (`envsubst`) for Caddy + Homer configs.
+- Orchestration: `up.sh` and `down.sh` can run all stacks or a selected subset.
 
-Services grouped by Docker Compose stack based on container labels.
+## Compose strategy and tradeoff
 
-- **admin-stack (`admin-stack.yml`):**
-  - `autohealer`: Automated container restart utility.
-  - `cloudflared`: Cloudflare tunnel daemon.
-  - `dockerproxy`: Secure Docker socket proxy.
-  - `glances`: System monitoring tool.
-  - `homer`: Static dashboard for services.
-  - `watchtower`: Automated container image updates.
-  - `wud`: Container update notifier.
+This repository keeps **multiple compose files + orchestration scripts**.
 
-- **ai-stack (`ai-stack.yml`):**
-  - `ollama`: Local large language model runner.
-  - `open-webui`: Web interface for local LLMs.
+Why this approach:
+- Easier to operate partial workloads (`./up.sh media dev`) without editing files.
+- Lower blast radius: one stack can be changed/restarted independently.
+- Better readability for homelab users than one very large compose file.
 
-- **arr-stack (`arr-stack.yml`):**
-  - `bazarr`: Subtitle manager.
-  - `bookshelf`: Book tracking and management.
-  - `flaresolverr`: Captcha bypass proxy.
-  - `gluetun`: VPN client for secure network routing.
-  - `lidarr`: Music collection manager.
-  - `profilarr`: Radarr/Sonarr profile sync.
-  - `prowlarr`: Indexer manager.
-  - `qbittorrent`: Torrent client.
-  - `radarr`: Movie collection manager.
-  - `seerr`: Media request management.
-  - `sonarr`: TV show collection manager.
+Tradeoff:
+- Cross-stack dependencies are managed operationally (script order) instead of in one Compose model.
 
-- **dev-stack (`dev-stack.yml`):**
-  - `code-server`: Web-based VS Code environment.
-  - `ittools`: Collection of handy tools for developers.
-  - `n8n`: Workflow automation platform.
-  - `network-tools`: Networking troubleshooting toolbox.
+## Configuration guide (`.env`)
 
-- **home-stack (`home-stack.yml`):**
-  - `actual-server`: Local personal finance management.
-  - `mealie`: Recipe and meal management.
+Required core values:
+- `DOMAIN` → base domain (example: `example.com`)
+- `DATA_ROOT` → persistent app data root
+- `MEDIA_ROOT` → media mount root
+- `CLOUDFLARE_API_TOKEN` → for Caddy DNS challenge
+- `CLOUDFLARE_TUNNEL_TOKEN` → for cloudflared container
+- `TAILSCALE_AUTH_KEY` → host Tailscale bootstrap key (kept for setup docs/workflow)
 
-- **media-stack (`media-stack.yml`):**
-  - `audiobookshelf`: Audiobook and podcast server.
-  - `copyparty`: Web-based file manager and sharing.
-  - `filebrowser`: Web-based file manager.
-  - `iSponsorBlockTV`: SponsorBlock implementation for TV apps.
-  - `jellyfin`: Media server.
-  - `jellyplex-watched`: Sync watched status.
-  - `metube`: YouTube downloader.
-  - `musicgrabber`: Music downloading tool.
-  - `navidrome`: Music server.
-  - `plex`: Media server for streaming video.
-  - `romm`: Retro game ROM manager.
-  - `tautulli`: Media monitoring and analytics.
-  - `tracearr`: New app for media monitoring, supports Plex + Jellyfin + Emby.
+After editing `.env`, render config templates manually if needed:
 
-- **productivity-stack (`productivity-stack.yml`):**
-  - `beaverhabits`: Habit tracking application.
-  - `bentopdf`: PDF manipulation and editing tool.
-  - `karakeep`: Data management application.
-  - `karakeep-chrome`: Chrome dependency for karakeep.
-  - `karakeep-meilisearch`: Search dependency for karakeep.
-  - `memos`: Privacy-first lightweight note-taking service.
+```bash
+./scripts/render-configs.sh
+```
 
-- **smarthome-stack (`smarthome-stack.yml`):**
-  - `homebridge`: HomeKit integration for non-supported devices.
+Generated outputs:
+- `configs/Caddyfile`
+- `configs/homer/config.yml` (and mirrored to `configs/homer.yml` for convenience)
 
-- **Standalone Containers (No Stack):**
-  - `portainer`: Container management GUI.
+## Install flow (`install.sh`)
 
-## Setup Notes
+`install.sh` is idempotent and safe to re-run. It will:
 
-- Caddy: installed as a system service (systemd). It reads `configs/Caddyfile` in this repo.
-- DNS & routing: A records point to homelab Tailnet IP; subdomains point to services in Caddyfile. Caddy handles TLS dynamically via ACME/DNS (Cloudflare).
-- Docker services: use docker-compose files under `docker-compose/`. Store sensitive values outside repository.
+1. Install prerequisites (`curl`, `gnupg`, `gettext-base`, etc.).
+2. Install Docker Engine + Compose plugin if missing.
+3. Enable/start Docker service.
+4. Create required directories from `.env` paths.
+5. Add current user to `docker` group (if needed).
+6. Run light sanity checks (free disk + ports 80/443 in use).
+7. Render templated configs.
 
-## Passwords & Keys
+## Known limitations
 
-- Passwords and keys are **not** stored here.
-- Recommended: store secrets in a password manager (e.g., Bitwarden) and inject into host environment.
-- Example secrets (DO NOT commit):
-  - CLOUDFLARE_API_TOKEN
+- This is a homelab template, not a hardened production baseline.
+- Secrets are environment-based; do not commit real tokens in `.env`.
+- Some services require manual post-setup API keys/tokens in app UIs.
+- VPN-dependent workloads (arr stack) depend on valid provider credentials.
+- Host-level Caddy/Tailscale installation details vary by distro and are minimally opinionated here.
+- Port collisions are possible if the host already runs other services.
+
+## Notes
+
+- Compose files use `.env` interpolation for paths/domain/secrets.
+- If you change `DOMAIN`, re-run `./scripts/render-configs.sh` and reload Caddy.

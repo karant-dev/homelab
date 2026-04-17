@@ -30,7 +30,7 @@ services:
   #     - INDEX_HABIT_DATE_COLUMNS=5 # Customize the date columns for the index page.
   #     - MAX_USER_COUNT=2
   #   volumes:
-  #     - /home/karant/docker-data/beaver/:/app/.user/ # Change directory to match your docker file scheme.
+  #     - ${DATA_ROOT}/beaver/:/app/.user/ # Change directory to match your docker file scheme.
   #   ports:
   #     - '8101:8080'
   #   restart: unless-stopped
@@ -50,7 +50,7 @@ services:
     ports:
       - '8102:5230'
     volumes:
-      - /home/karant/docker-data/memos:/var/opt/memos
+      - ${DATA_ROOT}/memos:/var/opt/memos
     environment:
       - MEMOS_MODE=prod
       - MEMOS_PORT=5230
@@ -76,13 +76,13 @@ services:
     ports:
       - '8103:3000'
     volumes:
-      - /home/karant/docker-data/karakeep/data:/data
+      - ${DATA_ROOT}/karakeep/data:/data
     environment:
       - MEILI_ADDR=http://karakeep-meilisearch:7700
       - BROWSER_WEB_URL=http://karakeep-chrome:9222
-      - NEXTAUTH_SECRET=REDACTED
-      - MEILI_MASTER_KEY=REDACTED
-      - NEXTAUTH_URL=https://bookmarks.karant.dev
+      - NEXTAUTH_SECRET=${KARAKEEP_NEXTAUTH_SECRET}
+      - MEILI_MASTER_KEY=${KARAKEEP_MEILI_MASTER_KEY}
+      - NEXTAUTH_URL=https://bookmarks.${DOMAIN}
       - DATA_DIR=/data
       - CRAWLER_STORE_SCREENSHOT=true
       - CRAWLER_FULL_PAGE_SCREENSHOT=true
@@ -120,9 +120,9 @@ services:
     cpus: 0.5
     environment:
       - MEILI_NO_ANALYTICS=true
-      - MEILI_MASTER_KEY=REDACTED
+      - MEILI_MASTER_KEY=${KARAKEEP_MEILI_MASTER_KEY}
     volumes:
-      - /home/karant/docker-data/karakeep/meilisearch:/meili_data
+      - ${DATA_ROOT}/karakeep/meilisearch:/meili_data
     networks:
       - homelab-net
 
@@ -134,14 +134,14 @@ services:
   #   volumes:
   #     - nextcloud_aio_mastercontainer:/mnt/docker-aio-config  # ⚠️ Must not be renamed
   #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - /mnt/media:/mnt/media:rw
+  #     - ${MEDIA_ROOT}:${MEDIA_ROOT}:rw
   #   ports:
   #     - "11001:8080"   # AIO admin UI → https://<host-ip>:11001
   #   environment:
   #     - APACHE_PORT=11000
   #     - APACHE_IP_BINDING=127.0.0.1
-  #     - NEXTCLOUD_DATADIR=/mnt/media/nextcloud/data
-  #     - NEXTCLOUD_MOUNT=/mnt/media
+  #     - NEXTCLOUD_DATADIR=${MEDIA_ROOT}/nextcloud/data
+  #     - NEXTCLOUD_MOUNT=${MEDIA_ROOT}
   #     - NEXTCLOUD_UPLOAD_LIMIT=100G
   #     - NEXTCLOUD_MAX_TIME=7200
   #     - NEXTCLOUD_MEMORY_LIMIT=2048M

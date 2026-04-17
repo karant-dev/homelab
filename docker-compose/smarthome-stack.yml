@@ -9,9 +9,9 @@ services:
     pids_limit: 200
     network_mode: host
     environment:
-      - TZ=Europe/Dublin
+      - TZ=${TZ}
     volumes:
-      - /home/karant/docker-data/homebridge/config:/homebridge
+      - ${DATA_ROOT}/homebridge/config:/homebridge
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f '[h]omebridge' >/dev/null || exit 1"]
