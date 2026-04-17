@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  homebridge:
+    image: homebridge/homebridge:latest
+    container_name: homebridge
+    mem_limit: 2g
+    mem_reservation: 256m
+    cpus: 1.0
+    pids_limit: 200
+    network_mode: host
+    environment:
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/karant/docker-data/homebridge/config:/homebridge
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[h]omebridge' >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true

@@ -1,0 +1,157 @@
+version: "3.8"
+services:
+  bentopdf:
+    image: bentopdf/bentopdf:latest
+    container_name: bentopdf
+    mem_limit: 128m
+    cpus: 0.25
+    pids_limit: 100
+    ports:
+      - 8100:8080
+    environment:
+      - SIMPLE_MODE=true
+    restart: unless-stopped
+    networks:
+      - homelab-net
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    
+  # beaverhabits:
+  #   container_name: beaverhabits
+  #   user: 1000:1000
+  #   mem_limit: 256m
+  #   cpus: 0.25
+  #   pids_limit: 100
+  #   environment:
+  #     # See the link below to find all the environment variables
+  #     # https://github.com/daya0576/beaverhabits/wiki/Development#options
+  #     - HABITS_STORAGE=USER_DISK # DATABASE stores in a single SQLite database named habits.db. USER_DISK option saves in a local json file.
+  #     #- TRUSTED_LOCAL_EMAIL=karan.thakkar97@gmail.com # Skip authentication
+  #     - INDEX_HABIT_DATE_COLUMNS=5 # Customize the date columns for the index page.
+  #     - MAX_USER_COUNT=2
+  #   volumes:
+  #     - /home/karant/docker-data/beaver/:/app/.user/ # Change directory to match your docker file scheme.
+  #   ports:
+  #     - '8101:8080'
+  #   restart: unless-stopped
+  #   image: daya0576/beaverhabits:latest
+  #   networks:
+  #     - homelab-net
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #     #- autoheal=true
+
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 100
+    ports:
+      - '8102:5230'
+    volumes:
+      - /home/karant/docker-data/memos:/var/opt/memos
+    environment:
+      - MEMOS_MODE=prod
+      - MEMOS_PORT=5230
+    restart: unless-stopped
+    networks:
+      - homelab-net
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[/]memos' >/dev/null || pgrep -f '[m]emos' >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  karakeep-app:
+    image: ghcr.io/karakeep-app/karakeep:release
+    container_name: karakeep
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+    ports:
+      - '8103:3000'
+    volumes:
+      - /home/karant/docker-data/karakeep/data:/data
+    environment:
+      - MEILI_ADDR=http://karakeep-meilisearch:7700
+      - BROWSER_WEB_URL=http://karakeep-chrome:9222
+      - NEXTAUTH_SECRET=REDACTED
+      - MEILI_MASTER_KEY=REDACTED
+      - NEXTAUTH_URL=https://bookmarks.karant.dev
+      - DATA_DIR=/data
+      - CRAWLER_STORE_SCREENSHOT=true
+      - CRAWLER_FULL_PAGE_SCREENSHOT=true
+      - CRAWLER_ENABLE_ADBLOCKER=true
+      - CRAWLER_DOWNLOAD_ARCHIVE=true
+      - CRAWLER_STORE_PDF=true
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - INFERENCE_TEXT_MODEL=gemma3:4b
+      - INFERENCE_IMAGE_MODEL=gemma3:4b
+    networks:
+      - homelab-net
+      
+  karakeep-chrome:
+    image: gcr.io/zenika-hub/alpine-chrome
+    container_name: karakeep-chrome
+    restart: unless-stopped
+    shm_size: '1gb'
+    mem_limit: 1gb
+    cpus: 1.0
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+      - --remote-debugging-address=0.0.0.0
+      - --remote-debugging-port=9222
+      - --hide-scrollbars
+    networks:
+      - homelab-net
+
+  karakeep-meilisearch:
+    image: getmeili/meilisearch:v1.13.3
+    container_name: karakeep-meilisearch
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=REDACTED
+    volumes:
+      - /home/karant/docker-data/karakeep/meilisearch:/meili_data
+    networks:
+      - homelab-net
+
+  # nextcloud-aio-mastercontainer:
+  #   image: ghcr.io/nextcloud-releases/all-in-one:latest
+  #   init: true
+  #   restart: always
+  #   container_name: nextcloud-aio-mastercontainer   # ⚠️ Must not be renamed
+  #   volumes:
+  #     - nextcloud_aio_mastercontainer:/mnt/docker-aio-config  # ⚠️ Must not be renamed
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /mnt/media:/mnt/media:rw
+  #   ports:
+  #     - "11001:8080"   # AIO admin UI → https://<host-ip>:11001
+  #   environment:
+  #     - APACHE_PORT=11000
+  #     - APACHE_IP_BINDING=127.0.0.1
+  #     - NEXTCLOUD_DATADIR=/mnt/media/nextcloud/data
+  #     - NEXTCLOUD_MOUNT=/mnt/media
+  #     - NEXTCLOUD_UPLOAD_LIMIT=100G
+  #     - NEXTCLOUD_MAX_TIME=7200
+  #     - NEXTCLOUD_MEMORY_LIMIT=2048M
+  #   networks:
+  #     - homelab-net
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer   # ⚠️ Must not be renamed
+
+networks:
+  homelab-net:
+    external: true

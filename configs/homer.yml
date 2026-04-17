@@ -1,101 +1,66 @@
 ---
 title: "Karant's Homelab"
-subtitle: "Raspberry Pi 5 | Tailscale Network"
+subtitle: "Bosgame Mini PC (R7 6800H + 32 GB DDR5) | Tailscale Network"
 logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homer.png"
-
-theme: default
-header: true
-footer: '<p>🚀 Built with Homer | 🔒 Secured by Tailscale</p>'
+favicon: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/homebox.png"
+theme: walkxcode
+header: false
+footer: false
 
 columns: "3"
 connectivityCheck: true
 
+proxy:
+useCredentials: false
+
 links:
-  - name: "Portainer"
-    icon: "fas fa-dharmachakra"
-    url: "https://portainer.karant.dev"
+  - name: "Poolsuite"
+    icon: "fas fa-umbrella-beach"
+    url: "https://poolsuite.net/"
     target: "_blank"
   - name: "Cloudflare"
     icon: "fas fa-cloud"
-    url: "https://dash.cloudflare.com"
+    url: "https://dash.cloudflare.com/488fdd875f76300295df136c8b5466db/karant.dev/dns/records"
     target: "_blank"
   - name: "Tailscale Admin"
     icon: "fas fa-network-wired"
     url: "https://login.tailscale.com/admin"
     target: "_blank"
+  - name: "Icons"
+    icon: "fas fa-icons"
+    url: "https://dashboardicons.com/"
+    target: "_blank"
+  - name: "Configs"
+    icon: "fas fa-code"
+    url: "https://code.karant.dev"
+    target: "_blank"
 
 services:
-  - name: "📊 System Status"
+  - name: "System 📊"
     icon: "fas fa-heartbeat"
     items:
-      - name: "Pi System Stats"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/raspberry-pi.png"
+      - name: "System Stats"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/synology-vmm.png"
         subtitle: "CPU, RAM, Disk, Network"
         url: "https://stats.karant.dev"
         target: "_blank"
         type: "Glances"
-        endpoint: "http://localhost:61208"
+        endpoint: "https://stats.karant.dev"
         stats: [cpu, mem]
         # Click → goes to stats.karant.dev
         # Stats → fetched from localhost:61208
 
       - name: "Portainer"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/portainer.png"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer-pink.png"
         subtitle: "Docker Containers"
         url: "https://portainer.karant.dev"
         target: "_blank"
         type: "Portainer"
-        endpoint: "1"
-        apikey: "YOUR_PORTAINER_API_KEY" # Replace with your Portainer API key
+        endpoint: "https://portainer.karant.dev"
+        apikey: "REDACTED"
         # Click → goes to portainer.karant.dev
         # Stats → fetched from portainer.karant.dev API
 
-  - name: "🎬 Media Server"
-    icon: "fas fa-film"
-    items:
-      - name: "Plex"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/plex.png"
-        subtitle: "Stream anywhere"
-        url: "https://plex.karant.dev"
-        target: "_blank"
-        type: "Tautulli"
-        endpoint: "http://172.20.0.9:8181"
-        apikey: "YOUR_TAUTULLI_API_KEY" # Replace with your Tautulli API key
-        # Click → goes to plex.karant.dev
-        # Stats → fetched from internal Tautulli IP
-
-      - name: "Tautulli"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
-        subtitle: "Plex Statistics"
-        url: "https://tautulli.karant.dev"
-        target: "_blank"
-        type: "Ping"
-
-  - name: "📥 Downloads"
-    icon: "fas fa-download"
-    items:
-      - name: "Transmission"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/transmission.png"
-        subtitle: "Torrent Client (VPN)"
-        url: "https://trsm.karant.dev"
-        target: "_blank"
-        type: "Ping"
-        # Just a link with status check
-
-      - name: "Prowlarr"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
-        subtitle: "Indexer Manager (VPN)"
-        url: "https://prowlarr.karant.dev"
-        target: "_blank"
-        type: "Prowlarr"
-        endpoint: "http://172.20.0.6:9696"
-        apikey: "YOUR_PROWLARR_API_KEY" # Replace with your Prowlarr API key
-        # Click → goes to prowlarr.karant.dev
-        # Stats → fetched from internal IP
-
-  - name: "🏠 Smart Home"
-    icon: "fas fa-home"
-    items:
       - name: "Homebridge"
         logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homebridge.png"
         subtitle: "HomeKit Bridge"
@@ -103,20 +68,255 @@ services:
         target: "_blank"
         type: "Ping"
 
-  - name: "🛠️ Tools & Utilities"
-    icon: "fas fa-toolbox"
+  - name: "Media Server 🎬"
+    icon: "fas fa-film"
     items:
-      - name: "IT Tools"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/it-tools.png"
-        subtitle: "Developer Utilities"
-        url: "https://it.karant.dev"
+      - name: "Tracearr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tracearr.png"
+        subtitle: "Plex & Jellyfin Statistics"
+        url: "https://tracearr.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+
+      - name: "Plex"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/plex.png"
+        url: "https://plex.karant.dev"
+        target: "_blank"
+        type: "Tautulli"
+        endpoint: "https://tautulli.karant.dev"
+        apikey: "REDACTED"
+        # Click → goes to plex.karant.dev
+        # Stats → fetched from internal Tautulli IP
+
+      # - name: "Tautulli"
+      #   logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/tautulli.png"
+      #   subtitle: "Plex Statistics"
+      #   url: "https://tautulli.karant.dev"
+      #   target: "_blank"
+      #   type: "Ping"
+      #   method: "GET"
+
+      - name: "Jellyfin"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyfin.png"
+        url: "https://jelly.karant.dev"
+        target: "_blank"
+        type: "Emby"
+        endpoint: "https://jelly.karant.dev"
+        apikey: "REDACTED"
+        libraryType: "series"
+      
+      - name: "Navidrome"
+        subtitle: "Music Player"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/navidrome.png"
+        url: "https://music.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+      
+      - name: "Audiobookshelf"
+        subtitle: "Podcasts and Audiobooks"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/audiobookshelf.png"
+        url: "https://podcasts.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+
+  - name: "Downloads 📥"
+    icon: "fas fa-download"
+    items:
+      - name: "Copyparty 🎉"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/copyparty.png"
+        subtitle: "File Manager"
+        url: "https://files.karant.dev"
+        endpoint: "https://files.karant.dev/_homer/health"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+
+      - name: "qBitTorrent"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/qbittorrent.png"
+        subtitle: "Torrent Client (VPN)"
+        url: "https://qbit.karant.dev"
+        target: "_blank"
+        type: "qBittorrent"
+        rateInterval: 2000 # Interval for updating the download and upload rates.
+        torrentInterval: 5000 # Interval for updating the torrent count.
+
+      # - name: "Transmission"
+      #   logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/transmission.png"
+      #   subtitle: "Torrent Client (VPN)"
+      #   url: "https://trsm.karant.dev/transmission"
+      #   target: "_blank"
+      #   type: "Transmission"
+      #   endpoint: "https://trsm.karant.dev/transmission/rpc"
+
+      - name: "MeTube"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/metube.png"
+        subtitle: "YouTube Downloader"
+        url: "https://metube.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+      
+      - name: "Music Grabber"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/squeezebox-server.png"
+        subtitle: "Music Downloader"
+        url: "https://music-dl.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+
+  - name: "Home 🏠"
+    icon: "fas fa-house"
+    items:
+      - name: "Mealie"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/mealie.png"
+        subtitle: "Receipe Manager"
+        url: "https://recipes.karant.dev"
+        target: "_blank"
+        type: "Mealie"
+        apikey: "REDACTED"
+
+      - name: "Habits"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/habitsync.png"
+        subtitle: "Habit Tracker"
+        url: "https://habits.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+
+      - name: "Memos"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/twitter.png"
+        subtitle: "Mini Twitter"
+        url: "https://memos.karant.dev"
         target: "_blank"
         type: "Ping"
 
-      - name: "Filebrowser"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/filebrowser.png"
-        subtitle: "File Manager"
-        url: "https://files.karant.dev"
+      # - name: "Actual"
+      #   logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/actual-budget.png"
+      #   subtitle: "Budgeting"
+      #   url: "https://budget.karant.dev"
+      #   target: "_blank"
+      #   type: "Ping"
+      #   method: "GET"
+
+  - name: "Productivity 📝"
+    icon: "fas fa-tasks"
+    items:
+      - name: "Habits"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/habitsync.png"
+        subtitle: "Habit Tracker"
+        url: "https://habits.karant.dev"
         target: "_blank"
-        endpoint: "http://172.20.0.5:8080"
+        type: "Ping"
+        method: "GET"
+
+      - name: "Karakeep"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/karakeep.png"
+        subtitle: "Bookmarks"
+        url: "https://bookmarks.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Tools & Utilities 🛠️ "
+    icon: "fas fa-toolbox"
+    items:
+      - name: "Open WebUI"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/open-webui.png"
+        subtitle: "AI Chat UI"
+        url: "https://chat.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "n8n"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/n8n.png"
+        subtitle: "Automation & AI"
+        url: "https://n8n.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Bento PDF Tools"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/stirling-pdf.png"
+        subtitle: "PDF Utilities"
+        url: "https://pdftools.karant.dev/index.html#tools-header"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "IT Tools"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/it-tools.png"
+        subtitle: "Developer Utilities"
+        url: "https://ittools.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Network Tools"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/guacamole.png"
+        subtitle: "Network Utilities"
+        url: "https://nettools.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+  - name: "Arr 🏴☠️"
+    icon: "fas fa-sailboat"
+    items:
+      - name: "Prowlarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/prowlarr.png"
+        subtitle: "Indexer Manager (VPN)"
+        url: "https://prowlarr.karant.dev"
+        target: "_blank"
+        type: "Prowlarr"
+        endpoint: "https://prowlarr.karant.dev"
+        apikey: "REDACTED"
+        # Click → goes to prowlarr.karant.dev
+        # Stats → fetched from internal IP
+
+      - name: "Radarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/radarr.png"
+        subtitle: "Movie management"
+        url: "https://radarr.karant.dev"
+        target: "_blank"
+        type: "Radarr"
+        endpoint: "https://radarr.karant.dev"
+        apikey: "REDACTED"
+
+      - name: "Sonarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/sonarr.png"
+        subtitle: "Series management"
+        url: "https://sonarr.karant.dev"
+        target: "_blank"
+        type: "Sonarr"
+        endpoint: "https://sonarr.karant.dev"
+        apikey: "REDACTED"
+
+      - name: "Lidarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/lidarr.png"
+        subtitle: "Music management"
+        url: "https://lidarr.karant.dev"
+        target: "_blank"
+        type: "Lidarr"
+        endpoint: "https://lidarr.karant.dev"
+        apikey: "REDACTED"
+
+      - name: "Bazarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/bazarr.png"
+        subtitle: "Subtitle management"
+        url: "https://bazarr.karant.dev"
+        target: "_blank"
+        type: "Ping"
+        method: "GET"
+        endpoint: "https://bazarr.karant.dev"
+
+      - name: "Seerr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/jellyseerr.png"
+        subtitle: "Media request manager"
+        url: "https://seerr.karant.dev"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Profilarr"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/profilarr.png"
+        subtitle: "Quality profile manager"
+        url: "https://profilarr.karant.dev"
+        target: "_blank"
         type: "Ping"

@@ -1,0 +1,42 @@
+services:
+  # Recipe & Meal Management
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    restart: unless-stopped
+    ports:
+      - "10000:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    volumes:
+      - /home/karant/docker-data/mealie/data:/app/data
+    environment:
+      - ALLOW_SIGNUP=false
+      - TOKEN_TIME=9600
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    networks:
+      - homelab-net
+
+  # Budgeting & Finance (Shared Envelope Budgeting)
+  # actual_server:
+  #   image: actualbudget/actual-server:latest
+  #   container_name: actual-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "10001:5006"
+  #   volumes:
+  #     - /home/karant/docker-data/actual-budget/data:/data
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/Dublin
+  #   networks:
+  #     - homelab-net
+
+networks:
+  homelab-net:
+    external: true

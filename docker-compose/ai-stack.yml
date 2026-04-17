@@ -1,0 +1,51 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_VULKAN=1
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0 # Forces 680M compatibility
+      - OLLAMA_KEEP_ALIVE=5m
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    ports:
+      - "11434:11434"
+    networks:
+      - homelab-net
+    volumes:
+      - /home/karant/docker-data/ollama:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          cpus: '12.0'
+          memory: 12G
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    networks:
+      - homelab-net
+    ports:
+      - "10001:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - /home/karant/docker-data/open-webui:/app/backend/data
+    depends_on:
+      - ollama
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+networks:
+  homelab-net:
+    external: true

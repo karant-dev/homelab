@@ -1,0 +1,367 @@
+version: "3.8"
+services:
+  plex:
+    image: plexinc/pms-docker:latest
+    container_name: plex
+    network_mode: host
+    mem_limit: 6g
+    mem_reservation: 2g
+    cpus: 3.0
+    pids_limit: 400
+    environment:
+      - TZ=Europe/Dublin
+      - PLEX_CLAIM=REDACTED
+    volumes:
+      - /home/karant/docker-data/plex/config:/config
+      - /home/karant/docker-data/plex/transcode:/transcode
+      - /mnt/media:/media
+    restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 100
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/karant/docker-data/tautulli/config:/config
+    ports:
+      - "8181:8181"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[t]autulli' >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  tracearr:
+    image: ghcr.io/connorgallopo/tracearr:supervised
+    container_name: tracearr
+    mem_limit: 3g # The supervised image requires at least 3GB or it will OOM crash
+    shm_size: 512m # Required for PostgreSQL shared memory
+    cpus: 1.0 # Bumped up since it runs Postgres, Redis, and Node
+    pids_limit: 300 # Increased to handle the multiple bundled services
+    environment:
+      - TZ=Europe/Dublin
+      # Note: PUID and PGID are omitted because the official Tracearr image doesn't use standard linuxserver.io privilege dropping.
+    volumes:
+      - /home/karant/docker-data/tracearr/postgres:/data/postgres
+      - /home/karant/docker-data/tracearr/redis:/data/redis
+      - /home/karant/docker-data/tracearr/data:/app/data
+    ports:
+      - "8099:3000"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s # Extended to give Postgres time to initialize
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    mem_limit: 3g
+    mem_reservation: 768m
+    cpus: 2.0
+    pids_limit: 300
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/karant/docker-data/jellyfin/config:/config
+      - /mnt/media:/media
+    ports:
+      - "8096:8096"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - homelab-net
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  jellyplex-watched:
+    image: luigi311/jellyplex-watched:latest
+    container_name: jellyplex-watched
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100
+    depends_on:
+      plex:
+        condition: service_healthy
+      jellyfin:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - DRYRUN=False
+      - LOG_LEVEL=INFO
+      - TZ=Europe/Dublin
+      - PLEX_TOKEN=REDACTED
+      - PLEX_BASEURL=http://192.168.0.50:32400
+      - SSL_BYPASS=False
+      - JELLYFIN_BASEURL=http://jellyfin:8096
+      - JELLYFIN_TOKEN=REDACTED
+      - SYNC_FROM_PLEX_TO_JELLYFIN=True
+      - GENERATE_LOCATIONS=True
+      - MAX_THREADS=2
+      - USER_MAPPING={"karanthakkar97":"karan"}
+      - LIBRARY_MAPPING={"TV Shows":"TV"}
+    volumes:
+      - /home/karant/docker-data/jellyplex-watched:/config
+    networks:
+      - homelab-net
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'python -u main\\.py' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 100
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "8080:80"
+    volumes:
+      - /mnt/media:/srv
+    restart: unless-stopped
+    networks:
+      - homelab-net
+
+  copyparty:
+    image: copyparty/min:latest
+    container_name: copyparty
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 100
+    restart: unless-stopped
+    ports:
+      - "8090:3923"
+    volumes:
+      - /mnt/media:/w
+      - /home/karant/docker-data/copyparty:/cfg
+    networks:
+      - homelab-net
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[c]opyparty' >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  metube:
+    image: ghcr.io/alexta69/metube
+    container_name: metube
+    mem_limit: 2g
+    cpus: 3.0
+    pids_limit: 100
+    restart: unless-stopped
+    environment:
+    - DOWNLOAD_MODE=limited
+    - TEMP_DIR=/tmp
+    volumes:
+      - /mnt/media/data/completed/youtube:/downloads
+      - /home/karant/docker-data/metube/config:/app/config
+    networks:
+      - homelab-net
+    ports:
+      - 9081:8081
+    shm_size: '256m'
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8081/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  iSponsorBlockTV:
+    image: ghcr.io/dmunozv04/isponsorblocktv
+    container_name: iSponsorBlockTV
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 200
+    dns:
+      - 1.1.1.1
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/karant/docker-data/isponsorblocktv:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "tr '\\0' ' ' </proc/1/cmdline | grep -qi 'main.pyc'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  musicgrabber:
+    image: g33kphr33k/musicgrabber:latest
+    container_name: musicgrabber
+    mem_limit: 2g
+    shm_size: 2gb
+    cpus: 1.0
+    pids_limit: 200
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+      - MUSIC_DIR=/music
+      - DB_PATH=/data/music_grabber.db
+      - ENABLE_MUSICBRAINZ=true
+      - DEFAULT_CONVERT_TO_FLAC=true
+      - NAVIDROME_URL=http://navidrome:4533
+      - NAVIDROME_USER=karant
+      - NAVIDROME_PASS=Navidrome
+      - ACOUSTID_API_KEY=REDACTED
+    volumes:
+      - /home/karant/docker-data/musicgrabber/data:/data
+      - /mnt/media/Music:/music
+    ports:
+      - "38274:8080"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/config >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    mem_limit: 512m
+    cpus: 0.75
+    pids_limit: 100
+    environment:
+      - ND_SCANSCHEDULE=1h
+      - ND_LOGLEVEL=info
+      - ND_SESSIONTIMEOUT=24h
+      - ND_BASEURL=
+      - TZ=Europe/Dublin
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/karant/docker-data/navidrome:/data
+      - /mnt/media/Music:/music:ro
+    ports:
+      - "4533:4533"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:4533/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    mem_limit: 1g
+    mem_reservation: 256m
+    cpus: 1.5
+    pids_limit: 200
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+      - TZ=Europe/Dublin
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/karant/docker-data/audiobookshelf/config:/config
+      - /home/karant/docker-data/audiobookshelf/metadata:/metadata
+      - /mnt/media/Audiobooks:/audiobooks
+      - /mnt/media/Podcasts:/podcasts
+    ports:
+      - "13378:80"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 150
+    environment:
+      - TZ=Europe/Dublin
+      - PUID=1000
+      - PGID=1000
+      - ROMM_AUTH_ENABLED=true
+    volumes:
+      - /home/karant/docker-data/romm:/config
+      - /mnt/media/ROMs:/roms
+    ports:
+      - "8088:8080"
+    networks:
+      - homelab-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+networks:
+  homelab-net:
+    external: true

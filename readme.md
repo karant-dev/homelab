@@ -4,11 +4,12 @@
 
 ## What is this?
 
-Basic documentation for my personal homelab setup. Sections below are placeholders to organize future notes and configs.
+Basic documentation for my personal homelab setup. Sections below organize notes and configs.
 
 ## Hardware
 
-- `MAIN_SERVER` - Raspberry Pi 5 8 GB
+- `MAIN_SERVER` - Bosgame M4 (Ryzen 7 6800H, 32GB DDR5 RAM, 1TB SSD)
+- `STORAGE` - 16TB Seagate External HDD
 
 ## Software & Services
 
@@ -18,60 +19,92 @@ This section details the software, services and stacks that comprise the homelab
 
 Services installed directly on the host operating system.
 
-- **Caddy:** A powerful, enterprise-ready open source web server with automatic HTTPS. It is installed system-wide and used as a reverse proxy.
-  - The Caddyfile is located at `configs/Caddyfile`.
-    - It's built with the Cloudflare DNS plugin for ACME DNS challenges.
-- **Docker & Docker Compose:** The containerization platform used to run most of the services. The compose files are located in the `docker-compose` directory.
-- **Tailscale:** Provides a secure network (a tailnet) for accessing the homelab from anywhere.
+- **Caddy:** Web server with automatic HTTPS. Installed system-wide as reverse proxy. Handles routing for many internal ports.
+  - Caddyfile located at `configs/Caddyfile`.
+  - Built with Cloudflare DNS plugin for ACME DNS challenges.
+- **Docker & Docker Compose:** Containerization platform. Compose files located in `docker-compose` directory.
+- **Tailscale:** Secure network (tailnet) for accessing homelab remotely.
 
-### Docker Stacks
+### Docker Stacks & Containers
 
-The services are grouped into the following stacks, defined by the `docker-compose` files.
+Services grouped by Docker Compose stack based on container labels.
 
-- **Arr Stack (`arr-stack.yml`):**
-  - `prowlarr`: An indexer manager for torrents and usenet.
-- **Media Stack (`media-stack-compose.yml`):**
-  - `plex`: Media server for streaming video, music, and photos.
-  - `tautulli`: A monitoring and tracking application for Plex Media Server.
-  - `filebrowser`: A web-based file manager.
-- **Monitoring Stack (`monitoring-stack.yml`):**
-  - `homer`: A simple, static homepage for your server.
-  - `glances`: A cross-platform monitoring tool.
-- **Network Stack (`network-stack-compose.yml`) [not currently being used]:**
-  - `npm` (Nginx Proxy Manager): A reverse proxy for managing SSL certificates and routing traffic to services.
-  - `pihole`: A network-wide ad blocker.
-- **Smarthome Stack (`smarthome-stack-compose.yml`):**
-  - `homebridge`: A lightweight NodeJS server that emulates the iOS HomeKit API.
-- **VPN & Torrenting Stack (`vpn-torr-stack-compose.yml`):**
-  - `transmission-vpn`: A Transmission BitTorrent client that runs through a VPN.
+- **admin-stack (`admin-stack.yml`):**
+  - `autohealer`: Automated container restart utility.
+  - `cloudflared`: Cloudflare tunnel daemon.
+  - `dockerproxy`: Secure Docker socket proxy.
+  - `glances`: System monitoring tool.
+  - `homer`: Static dashboard for services.
+  - `watchtower`: Automated container image updates.
+  - `wud`: Container update notifier.
 
-### Services (Docker Containers)
+- **ai-stack (`ai-stack.yml`):**
+  - `ollama`: Local large language model runner.
+  - `open-webui`: Web interface for local LLMs.
 
-Here is a list of all services running in Docker containers:
+- **arr-stack (`arr-stack.yml`):**
+  - `bazarr`: Subtitle manager.
+  - `bookshelf`: Book tracking and management.
+  - `flaresolverr`: Captcha bypass proxy.
+  - `gluetun`: VPN client for secure network routing.
+  - `lidarr`: Music collection manager.
+  - `profilarr`: Radarr/Sonarr profile sync.
+  - `prowlarr`: Indexer manager.
+  - `qbittorrent`: Torrent client.
+  - `radarr`: Movie collection manager.
+  - `seerr`: Media request management.
+  - `sonarr`: TV show collection manager.
 
-- **Filebrowser:** Web-based file manager.
-- **Glances:** System monitoring tool.
-- **Homebridge:** HomeKit integration for non-supported devices.
-- **Homer:** Dashboard for services.
-- **Plex:** Media server.
-- **Prowlarr:** Indexer manager for *arr stack.
-- **Tautulli:** Plex monitoring and analytics.
-- **Transmission-VPN:** Torrent client with VPN.
+- **dev-stack (`dev-stack.yml`):**
+  - `code-server`: Web-based VS Code environment.
+  - `ittools`: Collection of handy tools for developers.
+  - `n8n`: Workflow automation platform.
+  - `network-tools`: Networking troubleshooting toolbox.
+
+- **home-stack (`home-stack.yml`):**
+  - `actual-server`: Local personal finance management.
+  - `mealie`: Recipe and meal management.
+
+- **media-stack (`media-stack.yml`):**
+  - `audiobookshelf`: Audiobook and podcast server.
+  - `copyparty`: Web-based file manager and sharing.
+  - `filebrowser`: Web-based file manager.
+  - `iSponsorBlockTV`: SponsorBlock implementation for TV apps.
+  - `jellyfin`: Media server.
+  - `jellyplex-watched`: Sync watched status.
+  - `metube`: YouTube downloader.
+  - `musicgrabber`: Music downloading tool.
+  - `navidrome`: Music server.
+  - `plex`: Media server for streaming video.
+  - `romm`: Retro game ROM manager.
+  - `tautulli`: Media monitoring and analytics.
+  - `tracearr`: New app for media monitoring, supports Plex + Jellyfin + Emby.
+
+- **productivity-stack (`productivity-stack.yml`):**
+  - `beaverhabits`: Habit tracking application.
+  - `bentopdf`: PDF manipulation and editing tool.
+  - `karakeep`: Data management application.
+  - `karakeep-chrome`: Chrome dependency for karakeep.
+  - `karakeep-meilisearch`: Search dependency for karakeep.
+  - `memos`: Privacy-first lightweight note-taking service.
+
+- **smarthome-stack (`smarthome-stack.yml`):**
+  - `homebridge`: HomeKit integration for non-supported devices.
+
+- **Standalone Containers (No Stack):**
+  - `portainer`: Container management GUI.
 
 ## Setup Notes
 
-- Caddy: installed as a system service (systemd). It reads homelab/configs/Caddyfile in this repo.
-- If you need to rebuild Caddy to add plugins, use xcaddy (example above) and replace the system binary or install under a dedicated path used by your service unit.
-- DNS & routing: A records have been created pointing to the homelab Tailnet IP; subdomains are pointed to their services in the Caddyfile. Caddy handles TLS dynamically via ACME/DNS (Cloudflare plugin), so certificates are managed automatically.
-- Docker services: use the docker-compose files under homelab/docker-compose/. Store sensitive values (passwords, tokens, claims) outside the repository.
+- Caddy: installed as a system service (systemd). It reads `configs/Caddyfile` in this repo.
+- DNS & routing: A records point to homelab Tailnet IP; subdomains point to services in Caddyfile. Caddy handles TLS dynamically via ACME/DNS (Cloudflare).
+- Docker services: use docker-compose files under `docker-compose/`. Store sensitive values outside repository.
 
 ## Passwords & Keys
 
 - Passwords and keys are **not** stored here.
-- Recommended: store secrets in a password manager (e.g., Bitwarden) and inject into the host environment or a gitignored .env file.
-- Example .env variables to set (DO NOT commit .env):
-  - OPENVPN_USERNAME, OPENVPN_PASSWORD
-  - PLEX_CLAIM
+- Recommended: store secrets in a password manager (e.g., Bitwarden) and inject into host environment.
+- Example secrets (DO NOT commit):
   - CLOUDFLARE_API_TOKEN
 
 ## To-Do
@@ -80,7 +113,3 @@ Here is a list of all services running in Docker containers:
 - Document security basics
 - List future hardware upgrades
 - Create network diagram
-
----
-
-*This README will be updated regularly as devices and services are added or changed.*

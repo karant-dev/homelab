@@ -1,0 +1,148 @@
+version: "3.8"
+
+services:
+
+  # # Dozzle - Log Viewer
+  # dozzle:
+  #   image: amir20/dozzle:latest
+  #   container_name: dozzle
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   ports:
+  #     - "9002:8080"
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #     - autoheal=true
+
+
+  # Autoheal - Container Restart Manager
+  autohealer:
+    image: willfarrell/autoheal
+    container_name: autohealer
+    mem_limit: 128m
+    cpus: 0.25
+    pids_limit: 50
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  # Watchtower - Automatic Updates
+  watchtower:
+    image: nickfedor/watchtower
+    container_name: watchtower
+    mem_limit: 256m
+    cpus: 0.25
+    pids_limit: 100
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=86400 # Check every 24 hours (in seconds)
+    healthcheck:
+      test: ["CMD", "/watchtower", "--help"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - autoheal=true
+
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer
+    mem_limit: 256m
+    cpus: 0.25
+    pids_limit: 50
+    volumes:
+      - /home/karant/docker-data/homer/config/dir:/www/assets
+    ports:
+      - 8085:8080
+    user: "1000:1000"
+    environment:
+      - INIT_ASSETS=1
+    restart: unless-stopped
+    networks:
+      - homelab-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+  # Cloudflare Tunnel
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=REDACTED
+    networks:
+      - homelab-net
+    healthcheck:
+      test: ["CMD-SHELL", "cloudflared tunnel info || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  dockerproxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: dockerproxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: 1   # allow read/inspect on containers endpoint
+      POST: 1         # allow POST requests (needed for restart action)
+      # Everything else defaults to 0 (blocked)
+    networks:
+      - homelab-net
+
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 150
+    restart: unless-stopped
+    pid: host
+    privileged: true
+    network_mode: host
+    environment:
+      - GLANCES_OPT=-w
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    ports:
+      - "61208:61208"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f glances >/dev/null && (netstat -lnt 2>/dev/null | grep -q ':61208 ' || ss -lnt 2>/dev/null | grep -q ':61208 ')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - autoheal=true
+
+
+networks:
+  homelab-net:
+    external: true
