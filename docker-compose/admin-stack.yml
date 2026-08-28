@@ -80,34 +80,26 @@ services:
       - com.centurylinklabs.watchtower.enable=true
       - autoheal=true
 
-  # Pi-hole - DNS Ad-blocking & Local DNS
-  pihole:
-    image: pihole/pihole:latest
-    container_name: pihole
+  # AdGuard Home - DNS Ad-blocking & Local DNS
+  adguardhome:
+    image: adguard/adguardhome:latest
+    container_name: adguardhome
     restart: unless-stopped
     mem_limit: 512m
     cpus: 0.50
     pids_limit: 100
     environment:
       - TZ=Europe/Dublin
-      - WEBPASSWORD=${PIHOLE_WEBPASSWORD:-SetYourPasswordHere}
-      - FTLCONF_LOCAL_IPV4=192.168.0.50
-      - WEBTHEME=default-dark
     ports:
       - "53:53/tcp"
       - "53:53/udp"
       - "8088:80/tcp"
+      - "3000:3000/tcp"
     volumes:
-      - /home/karant/docker-data/pihole/etc-pihole:/etc/pihole
-      - /home/karant/docker-data/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+      - /home/karant/docker-data/adguard/work:/opt/adguardhome/work
+      - /home/karant/docker-data/adguard/conf:/opt/adguardhome/conf
     networks:
       - homelab-net
-    healthcheck:
-      test: ["CMD-SHELL", "dig +norecurse +retry=0 @127.0.0.1 pi.hole || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - autoheal=true
