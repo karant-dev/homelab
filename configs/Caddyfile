@@ -42,7 +42,7 @@
 
 # Simple Homer-frontend site (CORS + reverse proxy)
 (homer_site) {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 	import site {args.0}
 }
 
@@ -62,7 +62,7 @@
 (homer_headers_all) {
 	@all path *
 	header @all {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With"
@@ -75,7 +75,7 @@
 (homer_headers_all_transmission) {
 	@all path *
 	header @all {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With, X-Transmission-Session-Id"
@@ -88,7 +88,7 @@
 (homer_headers_api) {
 	@api path /api/*
 	header @api {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Api-Key, X-Requested-With"
@@ -101,7 +101,7 @@
 (homer_headers_api_ext) {
 	@api path /api/*
 	header @api {
-		# Access-Control-Allow-Origin https://https://homelab.example.com
+		# Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Origin chrome-extension://kgcjekpmcjjogibpjebkhaanilehneje
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -121,6 +121,21 @@
 }
 
 # ───────────────────────── Sites ─────────────────────────
+
+# AdGuard Home (Admin UI)
+adguard.example.com, dns.example.com {
+	import cors https://homelab.example.com
+
+	reverse_proxy localhost:8088 {
+		header_up Host {host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
 
 # Cockpit web console
 cockpit.example.com {
@@ -145,6 +160,36 @@ hb.example.com {
 	import cloudflare_dns
 }
 
+# Homeassistant
+ha.example.com {
+	@cors_preflight method OPTIONS
+	handle @cors_preflight {
+		header Access-Control-Allow-Origin https://homelab.example.com
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Requested-With"
+		header Access-Control-Allow-Credentials "true"
+		header Access-Control-Max-Age "3600"
+		respond "" 204
+	}
+
+	reverse_proxy localhost:8123 {
+		header_up Host {host}
+		header_up X-Forwarded-For {remote_host}
+		header_up Upgrade {http.upgrade}
+		header_up Connection {http.connection}
+	}
+
+	@origin header Origin https://homelab.example.com
+	header @origin {
+		Access-Control-Allow-Origin https://homelab.example.com
+		Access-Control-Allow-Credentials true
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "*"
+	}
+
+	import cloudflare_dns
+}
+
 # Transmission
 trsm.example.com {
 	reverse_proxy localhost:9091 {
@@ -164,9 +209,9 @@ qbit.example.com {
 		import strip_down_cors_full
 	}
 
-	@origin header Origin https://https://homelab.example.com
+	@origin header Origin https://homelab.example.com
 	header @origin {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "*"
@@ -184,9 +229,9 @@ metube.example.com {
 		import strip_down_cors_full
 	}
 
-	@origin header Origin https://https://homelab.example.com
+	@origin header Origin https://homelab.example.com
 	header @origin {
-		Access-Control-Allow-Origin https://https://homelab.example.com
+		Access-Control-Allow-Origin https://homelab.example.com
 		Access-Control-Allow-Credentials true
 		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 		Access-Control-Allow-Headers "*"
@@ -268,7 +313,7 @@ files.example.com {
     # Homer liveness endpoint (CORS-safe)
     @health path /_homer/health
     handle @health {
-        header Access-Control-Allow-Origin https://https://homelab.example.com
+        header Access-Control-Allow-Origin https://homelab.example.com
         header Access-Control-Allow-Credentials true
         respond "ok" 200
     }
@@ -286,7 +331,7 @@ files.example.com {
 
 # Open WebUI
 chat.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 	import site_strip_cors localhost:10001
 }
 
@@ -328,7 +373,7 @@ code.example.com {
 
 # n8n - Workflow Automation
 n8n.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:5678 {
 		header_up Host {host}
@@ -340,7 +385,7 @@ n8n.example.com {
 
 # Portainer
 portainer.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:9443 {
 		transport http {
@@ -363,7 +408,7 @@ prowlarr.example.com {
 
 # Sonarr
 sonarr.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:8989 {
 		import strip_down_cors
@@ -375,7 +420,7 @@ sonarr.example.com {
 
 # Lidarr
 lidarr.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:8686 {
 		import strip_down_cors
@@ -387,7 +432,7 @@ lidarr.example.com {
 
 # Radarr
 radarr.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:7878 {
 		import strip_down_cors
@@ -399,7 +444,7 @@ radarr.example.com {
 
 # Bazarr
 bazarr.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:6767 {
 		import strip_down_cors
@@ -422,7 +467,7 @@ seerr.example.com {
 
 # Profilarr
 profilarr.example.com {
-	import cors https://https://homelab.example.com
+	import cors https://homelab.example.com
 
 	reverse_proxy localhost:6868 {
 		import strip_down_cors
@@ -448,7 +493,7 @@ bookmarks.example.com {
 		import strip_down_cors
 	}
 
-	import homer_headers_api_ext
+	import homer_headers_all
 	import cloudflare_dns
 }
 
@@ -488,6 +533,111 @@ dozzle.example.com {
 
 	import homer_headers_api
 	import cloudflare_dns
+}
+
+# Beszel -- System monitoring
+perf.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:8091 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Paperless-ngx -- Digitised Docs
+pprless.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:10010 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Draw.io -- for proper architecture diagrams
+diagram.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:8104 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Excalidraw -- whiteboarding
+draw.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:8105 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Immich -- Google Photos clone
+photos.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:10020 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Kanbn -- Trello clone
+kanban.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:8106 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Apache Superset -- Modern open-source Data Visualization
+data-viz.example.com {
+	import cors https://homelab.example.com
+	
+	reverse_proxy localhost:8083 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Public read access for Apache Superset
+http://public-viz.example.com {
+    # The Bouncer: Immediately reject anything sensitive
+    @blocked {
+        path /login*
+        path /admin*
+        path /users*
+        path /roles*
+        path /superset/sql_lab*
+        path /api/v1/security*
+    }
+    respond @blocked "Access Denied - Public Portal" 403
+
+    reverse_proxy localhost:8083 {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Port 443
+        header_up X-Forwarded-Proto https
+    }
 }
 
 # Nextcloud AIO

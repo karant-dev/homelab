@@ -11,7 +11,7 @@ columns: "3"
 connectivityCheck: true
 
 proxy:
-useCredentials: false
+  useCredentials: false
 
 links:
   - name: "Poolsuite"
@@ -49,6 +49,17 @@ services:
         stats: [cpu, mem]
         # Click → goes to stats.${DOMAIN}
         # Stats → fetched from localhost:61208
+      
+      - name: "AdGuard Home"
+        type: "AdGuardHome"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/adguard-home.png"
+        subtitle: "Network DNS & Ad-blocking"
+        tag: "network"
+        keywords: "dns adblock security"
+        url: "https://adguard.${DOMAIN}"
+        target: "_blank"
+        headers:
+          Authorization: "${HOMER_ADGUARD_AUTH_HEADER}"
 
       - name: "Portainer"
         logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer-pink.png"
@@ -65,6 +76,21 @@ services:
         logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/homebridge.png"
         subtitle: "HomeKit Bridge"
         url: "https://hb.${DOMAIN}"
+        target: "_blank"
+        type: "Ping"
+      
+      - name: "Home Assistant"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/home-assistant.png"
+        subtitle: "Smart home"
+        url: "https://ha.${DOMAIN}"
+        target: "_blank"
+        type: "HomeAssistant"
+        apikey: "${HOMER_API_KEY_PLACEHOLDER}"
+      
+      - name: "Beszel"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/beszel.png"
+        subtitle: "Performance dashboard"
+        url: "https://perf.${DOMAIN}"
         target: "_blank"
         type: "Ping"
 
@@ -178,20 +204,17 @@ services:
         type: "Mealie"
         apikey: "${HOMER_API_KEY_PLACEHOLDER}"
 
-      - name: "Habits"
-        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/habitsync.png"
-        subtitle: "Habit Tracker"
-        url: "https://habits.${DOMAIN}"
-        target: "_blank"
-        type: "Ping"
-        method: "GET"
+      - name: "Immich"
+        type: "Immich"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/immich.png"
+        url: "https://photos.${DOMAIN}"
+        apikey: "${HOMER_API_KEY_PLACEHOLDER}"
 
-      - name: "Memos"
-        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/twitter.png"
-        subtitle: "Mini Twitter"
-        url: "https://memos.${DOMAIN}"
-        target: "_blank"
-        type: "Ping"
+      - name: "Paperless"
+        type: "PaperlessNG"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/paperless-ngx.png"
+        url: "https://pprless.${DOMAIN}"
+        apikey: "${HOMER_API_KEY_PLACEHOLDER}"
 
       # - name: "Actual"
       #   logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/actual-budget.png"
@@ -204,10 +227,18 @@ services:
   - name: "Productivity 📝"
     icon: "fas fa-tasks"
     items:
-      - name: "Habits"
-        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/habitsync.png"
-        subtitle: "Habit Tracker"
-        url: "https://habits.${DOMAIN}"
+      # - name: "Habits"
+      #   logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/habitsync.png"
+      #   subtitle: "Habit Tracker"
+      #   url: "https://habits.${DOMAIN}"
+      #   target: "_blank"
+      #   type: "Ping"
+      #   method: "GET"
+
+      - name: "Kan"
+        logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/trello.png"
+        subtitle: "Kanban Boards"
+        url: "https://kanban.${DOMAIN}"
         target: "_blank"
         type: "Ping"
         method: "GET"
@@ -215,13 +246,34 @@ services:
       - name: "Karakeep"
         logo: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/karakeep.png"
         subtitle: "Bookmarks"
-        url: "https://bookmarks.${DOMAIN}"
+        url: "https://bookmarks.${DOMAIN}/favicon.ico"
         target: "_blank"
         type: "Ping"
 
   - name: "Tools & Utilities 🛠️ "
     icon: "fas fa-toolbox"
     items:
+      - name: "Apache Superset"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/apache-superset.png"
+        subtitle: "Data visualization"
+        url: "https://data-viz.${DOMAIN}"
+        target: "_blank"
+        type: "Ping"
+
+      - name: "Draw IO"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/draw-io.png"
+        subtitle: "Architecture Diagrams"
+        url: "https://diagram.${DOMAIN}"
+        target: "_blank"
+        type: "Ping"
+      
+      - name: "Excalidraw"
+        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/excalidraw.png"
+        subtitle: "Whiteboarding"
+        url: "https://draw.${DOMAIN}"
+        target: "_blank"
+        type: "Ping"
+      
       - name: "Open WebUI"
         logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/open-webui.png"
         subtitle: "AI Chat UI"
@@ -237,7 +289,7 @@ services:
         type: "Ping"
 
       - name: "Bento PDF Tools"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/stirling-pdf.png"
+        logo: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/bentopdf.png"
         subtitle: "PDF Utilities"
         url: "https://pdftools.${DOMAIN}/index.html#tools-header"
         target: "_blank"
@@ -314,9 +366,9 @@ services:
         target: "_blank"
         type: "Ping"
 
-      - name: "Profilarr"
-        logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/profilarr.png"
-        subtitle: "Quality profile manager"
-        url: "https://profilarr.${DOMAIN}"
-        target: "_blank"
-        type: "Ping"
+      # - name: "Profilarr"
+      #   logo: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/profilarr.png"
+      #   subtitle: "Quality profile manager"
+      #   url: "https://profilarr.${DOMAIN}"
+      #   target: "_blank"
+      #   type: "Ping"

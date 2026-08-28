@@ -122,6 +122,21 @@
 
 # ───────────────────────── Sites ─────────────────────────
 
+# AdGuard Home (Admin UI)
+adguard.${DOMAIN}, dns.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+
+	reverse_proxy localhost:8088 {
+		header_up Host {host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
 # Cockpit web console
 cockpit.${DOMAIN} {
 	reverse_proxy localhost:9090 {
@@ -142,6 +157,36 @@ ${HOMER_ORIGIN} {
 # Homebridge
 hb.${DOMAIN} {
 	import homer_site localhost:8581
+	import cloudflare_dns
+}
+
+# Homeassistant
+ha.${DOMAIN} {
+	@cors_preflight method OPTIONS
+	handle @cors_preflight {
+		header Access-Control-Allow-Origin https://${HOMER_ORIGIN}
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Requested-With"
+		header Access-Control-Allow-Credentials "true"
+		header Access-Control-Max-Age "3600"
+		respond "" 204
+	}
+
+	reverse_proxy localhost:8123 {
+		header_up Host {host}
+		header_up X-Forwarded-For {remote_host}
+		header_up Upgrade {http.upgrade}
+		header_up Connection {http.connection}
+	}
+
+	@origin header Origin https://${HOMER_ORIGIN}
+	header @origin {
+		Access-Control-Allow-Origin https://${HOMER_ORIGIN}
+		Access-Control-Allow-Credentials true
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "*"
+	}
+
 	import cloudflare_dns
 }
 
@@ -448,7 +493,7 @@ bookmarks.${DOMAIN} {
 		import strip_down_cors
 	}
 
-	import homer_headers_api_ext
+	import homer_headers_all
 	import cloudflare_dns
 }
 
@@ -488,6 +533,111 @@ dozzle.${DOMAIN} {
 
 	import homer_headers_api
 	import cloudflare_dns
+}
+
+# Beszel -- System monitoring
+perf.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:8091 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Paperless-ngx -- Digitised Docs
+pprless.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:10010 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Draw.io -- for proper architecture diagrams
+diagram.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:8104 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Excalidraw -- whiteboarding
+draw.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:8105 {
+		import strip_down_cors
+	}
+
+	import homer_headers_api
+	import cloudflare_dns
+}
+
+# Immich -- Google Photos clone
+photos.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:10020 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Kanbn -- Trello clone
+kanban.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:8106 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Apache Superset -- Modern open-source Data Visualization
+data-viz.${DOMAIN} {
+	import cors https://${HOMER_ORIGIN}
+	
+	reverse_proxy localhost:8083 {
+		import strip_down_cors
+	}
+
+	import homer_headers_all
+	import cloudflare_dns
+}
+
+# Public read access for Apache Superset
+http://public-viz.${DOMAIN} {
+    # The Bouncer: Immediately reject anything sensitive
+    @blocked {
+        path /login*
+        path /admin*
+        path /users*
+        path /roles*
+        path /superset/sql_lab*
+        path /api/v1/security*
+    }
+    respond @blocked "Access Denied - Public Portal" 403
+
+    reverse_proxy localhost:8083 {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Port 443
+        header_up X-Forwarded-Proto https
+    }
 }
 
 # Nextcloud AIO
